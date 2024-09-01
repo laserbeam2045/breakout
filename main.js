@@ -427,7 +427,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRed3edPeNVhHjjY1WIl7-eHIozDpd2DAcEl4DVbMM0WcxGRKwi',
+        'background': 'https://ecotopia.earth/wp-content/uploads/4692-2.jpg',
       },
     },
   });
