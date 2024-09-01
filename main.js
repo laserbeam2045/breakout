@@ -54,20 +54,25 @@ phina.define("MainScene", {
     // ゲームオーバーフラグ
     this.isGameOver = false;
 
-    // 背景テキスト
-    this.backgroundLabel = Label({
-      text: '「口」  「岡」  「？？」',
-      fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
-      fontSize: 48,
-      fontWeight: 'bold',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 300);
+    // // 背景テキスト
+    // this.backgroundLabel = Label({
+    //   text: '「口」  「岡」  「？？」',
+    //   fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
+    //   fontSize: 48,
+    //   fontWeight: 'bold',
+    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 300);
 
-    this.backgroundLabel = Label({
-      text: '「富」  「梨」  「形」',
-      fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
-      fontSize: 48,
-      fontWeight: 'bold',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 200);
+    // this.backgroundLabel = Label({
+    //   text: '「富」  「梨」  「形」',
+    //   fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
+    //   fontSize: 48,
+    //   fontWeight: 'bold',
+    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 200);
+
+    // 背景画像の上半分を表示
+    var backgroundSprite = Sprite('background').addChildTo(this)
+      .setPosition(this.gridX.center(), this.gridY.center(-3)) // 画面上部に配置
+      .setSize(SCREEN_WIDTH - 200, SCREEN_HEIGHT / 2 - 100); // 高さを画面の半分に設定
 
     // デバイスがPCかどうかを判定
     this.isPC = !phina.isMobile();
@@ -420,6 +425,11 @@ phina.main(function() {
     backgroundColor: '#444',
     autoPause: true,
     debug: false,
+    assets: {
+      image: {
+        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Che_Guevara_-_Guerrillero_Heroico_by_Alberto_Korda.jpg/200px-Che_Guevara_-_Guerrillero_Heroico_by_Alberto_Korda.jpg',  // 背景画像のURL
+      },
+    },
   });
 
   app.enableStats();
