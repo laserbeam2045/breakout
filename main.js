@@ -4,7 +4,7 @@ var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
 var MAX_PER_LINE    = 8;
 var BLOCK_NUM       = MAX_PER_LINE * 5;
-var BLOCK_SIZE      = 64;
+var BLOCK_SIZE      = 66;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
@@ -69,13 +69,13 @@ phina.define("MainScene", {
     //   fontWeight: 'bold',
     // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 200);
 
+    // デバイスがPCかどうかを判定
+    this.isPC = !phina.isMobile();
+
     // 背景画像の上半分を表示
     var backgroundSprite = Sprite('background').addChildTo(this)
       .setPosition(this.gridX.center(), this.gridY.center(-3)) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 200, SCREEN_HEIGHT / 2 - 100); // 高さを画面の半分に設定
-
-    // デバイスがPCかどうかを判定
-    this.isPC = !phina.isMobile();
 
     // グループ
     this.group = DisplayElement().addChildTo(this);
@@ -267,7 +267,7 @@ phina.define("MainScene", {
       ball.direction.y = -Math.abs(ball.direction.x); // 反射角度を考慮してY方向の速度を調整
       ball.direction.normalize();
     
-      this.ballSpeed = Math.min(this.ballSpeed + 1, 32);
+      this.ballSpeed = Math.min(this.ballSpeed + 1, 24);
     }
   },
 
@@ -349,7 +349,7 @@ phina.define('Block', {
       height: BLOCK_SIZE,
       fill: 'hsl({0}, 80%, 60%)'.format(angle || 0),
       stroke: null,
-      cornerRadius: 8,
+      cornerRadius: 4,
     });
   },
 });
@@ -432,6 +432,6 @@ phina.main(function() {
     },
   });
 
-  app.enableStats();
+  // app.enableStats();
   app.run();
 });
