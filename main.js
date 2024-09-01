@@ -427,7 +427,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Che_Guevara_-_Guerrillero_Heroico_by_Alberto_Korda.jpg/200px-Che_Guevara_-_Guerrillero_Heroico_by_Alberto_Korda.jpg',  // 背景画像のURL
+        'background': 'https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRed3edPeNVhHjjY1WIl7-eHIozDpd2DAcEl4DVbMM0WcxGRKwi',
       },
     },
   });
