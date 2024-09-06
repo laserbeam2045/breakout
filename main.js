@@ -409,7 +409,8 @@ phina.main(function() {
     assets: {
       image: {
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
-        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
+        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
+        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
       },
     },
   });
