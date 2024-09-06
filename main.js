@@ -342,13 +342,28 @@ phina.define('Ball', {
   init: function() {
     this.superInit({
       radius: BALL_RADIUS,
-      fill: '#eee',
+      fill: 'white',
       stroke: null,
-      cornerRadius: 8,
     });
 
     this.speed = BALL_SPEED;  // 初期スピードを定義
     this.direction = Vector2(1, -1).normalize();
+  },
+
+  // 内側に影を描画するためのカスタム描画
+  draw: function(canvas) {
+    var ctx = canvas.context;
+
+    // グラデーションの作成 (内側から外側に向けて影)
+    var gradient = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, this.radius);
+    gradient.addColorStop(0, 'white');  // 中心は白
+    gradient.addColorStop(1, '#ccc');   // 外側はグレー (影っぽく見せる)
+
+    // グラデーションで塗りつぶし
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2, false);
+    ctx.fill();
   },
 
   move: function() {
@@ -414,7 +429,8 @@ phina.main(function() {
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
         // 'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
-        'background': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
+        // 'background': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
+        'background': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
       },
     },
   });
