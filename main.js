@@ -13,7 +13,7 @@ var BALL_SPEED      = 16;
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
-var BOARD_OFFSET_Y  = 150;
+var BOARD_OFFSET_Y  = 100;
 
 phina.define("TitleScene", {
   superClass: 'DisplayScene',
@@ -23,8 +23,8 @@ phina.define("TitleScene", {
 
     // タイトル表示
     Label({
-      text: 'Breakout Game',
-      fontSize: 64,
+      text: '何の絵か当てろげーむ',
+      fontSize: 50,
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
 
@@ -74,7 +74,7 @@ phina.define("MainScene", {
 
     // 背景画像の上半分を表示
     var backgroundSprite = Sprite('background').addChildTo(this)
-      .setPosition(this.gridX.center(), this.gridY.center(-3) - 20) // 画面上部に配置
+      .setPosition(this.gridX.center(), this.gridY.center(-3) - 70) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
 
     // グループ
@@ -90,7 +90,7 @@ phina.define("MainScene", {
 
     // パドル
     this.paddle = Paddle().addChildTo(this);
-    this.paddle.setPosition(this.gridX.center(), this.gridY.span(15));
+    this.paddle.setPosition(this.gridX.center(), this.gridY.span(13));
     this.paddle.hold(this.ball);
 
     // タッチまたはスペースキーでゲーム開始
