@@ -3,9 +3,9 @@ phina.globalize();
 // 変数の定義
 var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
-var MAX_PER_LINE    = 24;
+var MAX_PER_LINE    = 20;
 var BLOCK_NUM       = MAX_PER_LINE * 15;
-var BLOCK_SIZE      = 22;
+var BLOCK_SIZE      = 26.5;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
@@ -25,7 +25,7 @@ phina.define("TitleScene", {
 
     // タイトル表示
     Label({
-      text: '誰の写真か当てろげーむ',
+      text: '誰の写真か当てるげーむ',
       fontSize: 50,
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
@@ -226,6 +226,11 @@ phina.define("MainScene", {
       
       // ボールの速度を保つために正規化
       ball.direction.normalize();
+  
+      // ボールが1つだけの場合に分裂させる
+      if (this.balls.length === 1 && Math.random() < 0.5) {
+        this.splitBall(ball);
+      }
     }
   },
 
@@ -324,7 +329,7 @@ phina.define('Block', {
       height: BLOCK_SIZE,
       fill: 'hsl({0}, 80%, 60%)'.format(angle || 0),
       stroke: null,
-      cornerRadius: 4,
+      cornerRadius: 3,
     });
   },
 });
