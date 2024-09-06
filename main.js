@@ -472,7 +472,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Leonardo_da_Vinci_%281452-1519%29_-_The_Last_Supper_%281495-1498%29.jpg/1920px-Leonardo_da_Vinci_%281452-1519%29_-_The_Last_Supper_%281495-1498%29.jpg',
+        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Paul_Gauguin_-_D%27ou_venons-nous.jpg/1920px-Paul_Gauguin_-_D%27ou_venons-nous.jpg',
       },
     },
   });
