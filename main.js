@@ -1,19 +1,21 @@
 phina.globalize();
 
+// 変数の定義
 var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
-var MAX_PER_LINE    = 8;
-var BLOCK_NUM       = MAX_PER_LINE * 5;
-var BLOCK_SIZE      = 66;
+var MAX_PER_LINE    = 24;
+var BLOCK_NUM       = MAX_PER_LINE * 15;
+var BLOCK_SIZE      = 22;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
-var BALL_SPEED      = 16;
+var BALL_SPEED      = 32;  // ボールのスピードを少し上げる
+var BALL_NUMBER     = 5;  // ボールの数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
-var BOARD_OFFSET_Y  = 100;
+var BOARD_OFFSET_Y  = 80;
 
 phina.define("TitleScene", {
   superClass: 'DisplayScene',
@@ -54,21 +56,6 @@ phina.define("MainScene", {
     // ゲームオーバーフラグ
     this.isGameOver = false;
 
-    // // 背景テキスト
-    // this.backgroundLabel = Label({
-    //   text: '「口」  「岡」  「？？」',
-    //   fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
-    //   fontSize: 48,
-    //   fontWeight: 'bold',
-    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 300);
-
-    // this.backgroundLabel = Label({
-    //   text: '「富」  「梨」  「形」',
-    //   fill: 'rgba(255, 255, 255, 0.4)',  // 背景に馴染むように透明度を設定
-    //   fontSize: 48,
-    //   fontWeight: 'bold',
-    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 200);
-
     // デバイスがPCかどうかを判定
     this.isPC = !phina.isMobile();
 
@@ -77,123 +64,93 @@ phina.define("MainScene", {
       .setPosition(this.gridX.center(), this.gridY.center(-3) - 70) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
 
-    // グループ
     this.group = DisplayElement().addChildTo(this);
-
     var gridX = Grid(BOARD_SIZE, MAX_PER_LINE);
     var gridY = Grid(BOARD_SIZE, MAX_PER_LINE);
 
     this.createBlocks(gridX, gridY);
 
-    // ボール
-    this.ball = Ball().addChildTo(this);
-
-    // パドル
     this.paddle = Paddle().addChildTo(this);
-    this.paddle.setPosition(this.gridX.center(), this.gridY.span(13));
-    this.paddle.hold(this.ball);
+    this.paddle.setPosition(this.gridX.center(), this.gridY.span(13)); // バーを少し上に移動
 
-    // タッチまたはスペースキーでゲーム開始
+    // ボールを3つ作成
+    this.balls = [];
+    for (let i = 0; i < BALL_NUMBER; i++) {
+      let ball = Ball().addChildTo(this);
+      ball.setPosition(this.paddle.x, this.paddle.top - ball.radius);  // バドルの上にボールを配置
+      this.balls.push(ball);
+    }
+
+    this.paddle.hold(this.balls[0]);
+
     this.gameStarted = false;
     this.on('pointend', this.startGame.bind(this));
 
-    // 時間
     this.time = 0;
   },
 
   update: function(app) {
-    // タイムを加算
     this.time += app.deltaTime;
 
-    // ゲームオーバー時には更新処理を停止
     if (this.isGameOver || this.clearFlag) {
       this.on('pointend', () => {
-        if (this.endFlag) this.exit('main');  // スペースキーでシーンをリセットまたはタイトルに戻る
-        setTimeout(() => this.endFlag = true, 500)
+        if (this.endFlag) this.exit('main');
+        setTimeout(() => this.endFlag = true, 500);
       });
       if (app.keyboard.getKeyDown('space')) {
-        this.exit('main');  // スペースキーでシーンをリセットまたはタイトルに戻る
+        this.exit('main');
       }
       return;
     }
 
-    // スペースキーでゲーム開始
     if (!this.gameStarted && app.keyboard.getKeyDown('space')) {
       this.startGame();
     }
 
     if (this.gameStarted) {
-      var steps = Math.ceil(this.ballSpeed);
-      (steps).times(function() {
-        this.ball.move();
-        this.checkCollisions();
-        this.adjustBallAngle();
-      }, this);
+      this.balls.forEach(ball => {
+        ball.move();
+        this.checkCollisions(ball);
+        this.adjustBallAngle(ball);
+      });
     }
 
     if (this.isPC) {
-      // PCの場合はキーボード操作のみ
       this.movePaddleWithKeyboard(app.keyboard);
     } else {
-      // モバイルの場合はタッチ操作
       this.movePaddle(app.pointer);
     }
 
-    // スピードに基づいたフレームレート調整
-    var steps = Math.ceil(this.ballSpeed);
-
-    // スピードの数分、移動と衝突判定を繰り返す
-    (steps).times(function() {
-      this.ball.move();
-      this.checkCollisions();
-      this.adjustBallAngle(); // ボールが移動するたびに角度を調整
-    }, this);
-
-    // ブロックがすべてなくなったらクリア
     if (this.group.children.length <= 0) {
       this.gameClear();
     }
-  },
-
-  gameOver: function() {
-    this.isGameOver = true;
-
-    // 「Game Over」の表示
-    Label({
-      text: 'Game Over',
-      fontSize: 64,
-      fill: 'red',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
-
-    Label({
-      text: 'Press Space to Retry',
-      fontSize: 32,
-      fill: 'white',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
   },
 
   startGame: function() {
     if (!this.gameStarted) {
       this.gameStarted = true;
       this.paddle.release();
-      this.ballSpeed = BALL_SPEED;
-      this.ball.direction = Vector2(1, -Math.random()).normalize(); // 初期のボールの角度をランダムに調整
-      this.adjustBallAngle(); // 初期角度も調整
+
+      // ボールごとに速度と初期角度を設定
+      this.balls.forEach(ball => {
+        ball.speed = BALL_SPEED; // ボールのスピードを設定
+        ball.direction = Vector2(1, -Math.random()).normalize();
+      });
     }
   },
 
-  adjustBallAngle: function() {
-    var minAngle = 0.3; // 最小の傾き（ラジアン）
-    var maxAngle = 1.2; // 最大の傾き（ラジアン）
+  adjustBallAngle: function(ball) {
+    var minAngle = 0.3;
+    var maxAngle = 1.2;
 
-    if (Math.abs(this.ball.direction.x) < minAngle) {
-      this.ball.direction.x = Math.sign(this.ball.direction.x) * minAngle;
-      this.ball.direction.normalize();
+    if (Math.abs(ball.direction.x) < minAngle) {
+      ball.direction.x = Math.sign(ball.direction.x) * minAngle;
+      ball.direction.normalize();
     }
 
-    if (Math.abs(this.ball.direction.y) < minAngle) {
-      this.ball.direction.y = Math.sign(this.ball.direction.y) * minAngle;
-      this.ball.direction.normalize();
+    if (Math.abs(ball.direction.y) < minAngle) {
+      ball.direction.y = Math.sign(ball.direction.y) * minAngle;
+      ball.direction.normalize();
     }
   },
 
@@ -211,11 +168,11 @@ phina.define("MainScene", {
 
   movePaddle: function(pointer) {
     var targetX = pointer.x.clamp(this.paddle.width / 2, this.gridX.width - this.paddle.width / 2);
-    this.paddle.x += (targetX - this.paddle.x) * 0.2; // スムーズな移動
+    this.paddle.x += (targetX - this.paddle.x) * 0.2;
   },
 
   movePaddleWithKeyboard: function(keyboard) {
-    var speed = 35; // キーボードでの移動速度
+    var speed = 50;
 
     if (keyboard.getKey('left')) {
       this.paddle.x -= speed;
@@ -225,18 +182,16 @@ phina.define("MainScene", {
     }
 
     var targetX = this.paddle.x.clamp(this.paddle.width / 2, this.gridX.width - this.paddle.width / 2);
-    this.paddle.x += (targetX - this.paddle.x) * 0.2; // スムーズな移動
+    this.paddle.x += (targetX - this.paddle.x) * 0.2;
   },
 
-  checkCollisions: function() {
-    this.checkWallCollision();
-    this.checkPaddleCollision();
-    this.checkBlockCollisions();
+  checkCollisions: function(ball) {
+    this.checkWallCollision(ball);
+    this.checkPaddleCollision(ball);
+    this.checkBlockCollisions(ball);
   },
 
-  checkWallCollision: function() {
-    var ball = this.ball;
-
+  checkWallCollision: function(ball) {
     if (ball.left < 0) {
       ball.left = 0;
       ball.reflectX();
@@ -250,42 +205,42 @@ phina.define("MainScene", {
       ball.reflectY();
     }
     if (ball.bottom > this.gridY.width) {
-      ball.bottom = this.gridY.width;
-      ball.reflectY();
-      this.gameOver();  // ゲームオーバー処理を呼び出す
-    }
-  },
-
-  checkPaddleCollision: function() {
-    var ball = this.ball;
+      // ボールが画面の下に出た場合、ボールを削除
+      this.balls.splice(this.balls.indexOf(ball), 1);
+      ball.remove();
   
+      // すべてのボールがなくなったらゲームオーバー
+      if (this.balls.length === 0) {
+        this.gameOver();
+      }
+    }
+  },  
+
+  checkPaddleCollision: function(ball) {
     if (ball.hitTestElement(this.paddle)) {
+      // ボールの下側をパドルの上に移動させる
       ball.bottom = this.paddle.top;
-    
-      var dx = ball.x - this.paddle.x;
-      ball.direction.x = dx / (this.paddle.width / 2); // パドル全体の幅に基づいた反射角度の調整
-      ball.direction.y = -Math.abs(ball.direction.x); // 反射角度を考慮してY方向の速度を調整
+  
+      // X方向の反射（左右反転）
+      ball.reflectY();  // Y方向の反射
+      
+      // ボールの速度を保つために正規化
       ball.direction.normalize();
-    
-      this.ballSpeed = Math.min(this.ballSpeed + (0.1 * this.time / 1000), 20);
     }
   },
 
-  checkBlockCollisions: function() {
-    var ball = this.ball;
-  
+  checkBlockCollisions: function(ball) {
     this.group.children.clone().some(function(block) {
       if (ball.hitTestElement(block)) {
-        this.handleBlockCollision(block);
+        this.handleBlockCollision(block, ball);
         return true;
       }
     }, this);
   },
 
-  handleBlockCollision: function(block) {
-    var ball = this.ball;
+  handleBlockCollision: function(block, ball) {
     var dq = Vector2.sub(ball, block);
-
+  
     if (Math.abs(dq.x) < Math.abs(dq.y)) {
       ball.reflectY();
       if (dq.y >= 0) {
@@ -301,14 +256,35 @@ phina.define("MainScene", {
         ball.right = block.left;
       }
     }
-
+  
     block.remove();
+  
+    // ボールが1つだけの場合に分裂させる
+    if (this.balls.length === 1 && Math.random() < 0.333) {
+      this.splitBall(ball);
+    }
+  },
+
+  // ボールを3つに分裂させる関数
+  splitBall: function(originalBall) {
+    for (let i = 0; i < 2; i++) {
+      // 新しいボールを作成
+      let newBall = Ball().addChildTo(this);
+      
+      // 元のボールの位置に新しいボールを配置
+      newBall.setPosition(originalBall.x, originalBall.y);
+      
+      // 新しい角度で射出 (少し角度を変える)
+      newBall.direction = Vector2(Math.random() * 2 - 1, -1).normalize();
+      
+      // 新しいボールをボールリストに追加
+      this.balls.push(newBall);
+    }
   },
 
   gameClear: function() {
-    this.clearFlag = true
+    this.clearFlag = true;
 
-    // 「Game Over」の表示
     Label({
       text: 'Game Clear',
       fontSize: 64,
@@ -321,15 +297,10 @@ phina.define("MainScene", {
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
   },
-});
 
-phina.define("GameOverScene", {
-  superClass: 'DisplayScene',
+  gameOver: function() {
+    this.isGameOver = true;
 
-  init: function(options) {
-    this.superInit(options);
-
-    // ゲームオーバー表示
     Label({
       text: 'Game Over',
       fontSize: 64,
@@ -342,44 +313,8 @@ phina.define("GameOverScene", {
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
   },
-
-  update: function(app) {
-    if (app.keyboard.getKeyDown('space')) {
-      this.exit();  // タイトルシーンに戻るか、再挑戦シーンに移動
-    }
-  },
 });
 
-phina.define("ClearScene", {
-  superClass: 'DisplayScene',
-
-  init: function(options) {
-    this.superInit(options);
-
-    // ゲームオーバー表示
-    Label({
-      text: 'Clear Over',
-      fontSize: 64,
-      fill: 'red',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
-
-    Label({
-      text: 'Press Space to Retry',
-      fontSize: 32,
-      fill: 'white',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
-  },
-
-  update: function(app) {
-    if (app.keyboard.getKeyDown('space')) {
-      this.exit();  // タイトルシーンに戻るか、再挑戦シーンに移動
-    }
-  },
-});
-
-/*
- * ブロック
- */
 phina.define('Block', {
   superClass: 'RectangleShape',
 
@@ -394,9 +329,6 @@ phina.define('Block', {
   },
 });
 
-/*
- * ボール
- */
 phina.define('Ball', {
   superClass: 'CircleShape',
 
@@ -408,31 +340,30 @@ phina.define('Ball', {
       cornerRadius: 8,
     });
 
-    this.speed = 0;
+    this.speed = BALL_SPEED;  // 初期スピードを定義
     this.direction = Vector2(1, -1).normalize();
   },
 
   move: function() {
-    this.x += this.direction.x;
-    this.y += this.direction.y;
+    this.x += this.direction.x * this.speed;  // スピードを反映させる
+    this.y += this.direction.y * this.speed;  // スピードを反映させる
   },
 
   reflectX: function() {
     this.direction.x *= -1;
     this.speedUp();
   },
+
   reflectY: function() {
     this.direction.y *= -1;
     this.speedUp();
   },
+
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.5, 28); // 最大スピードを設定
+    this.speed = Math.min(this.speed + 0.5, 45);  // 最大スピードを設定
   },
 });
 
-/*
- * パドル
- */
 phina.define('Paddle', {
   superClass: 'RectangleShape',
   init: function() {
@@ -477,6 +408,5 @@ phina.main(function() {
     },
   });
 
-  // app.enableStats();
   app.run();
 });
