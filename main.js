@@ -408,7 +408,8 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
+        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
+        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
       },
     },
   });
