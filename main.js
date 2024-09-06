@@ -10,7 +10,8 @@ var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
-var BALL_SPEED      = 24;  // ボールのスピードを少し上げる
+var BALL_SPEED      = 18;  // ボールのスピードを少し上げる
+var MAX_BALL_SPEED  = 26;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT     = 5;  // 分裂する数
 
@@ -366,7 +367,7 @@ phina.define('Ball', {
   },
 
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.5, 32);  // 最大スピードを設定
+    this.speed = Math.min(this.speed + 0.5, MAX_BALL_SPEED);  // 最大スピードを設定
   },
 });
 
@@ -412,7 +413,8 @@ phina.main(function() {
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
-        'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+        // 'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+        'background': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
       },
     },
   });
