@@ -10,7 +10,7 @@ var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
-var BALL_SPEED      = 32;  // ボールのスピードを少し上げる
+var BALL_SPEED      = 24;  // ボールのスピードを少し上げる
 var BALL_NUMBER     = 5;  // ボールの数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
@@ -360,7 +360,7 @@ phina.define('Ball', {
   },
 
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.5, 45);  // 最大スピードを設定
+    this.speed = Math.min(this.speed + 0.5, 32);  // 最大スピードを設定
   },
 });
 
