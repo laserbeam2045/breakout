@@ -293,9 +293,9 @@ phina.define("MainScene", {
     this.clearFlag = true;
 
     Label({
-      text: 'Game Clear',
+      text: 'Game Clear!',
       fontSize: 64,
-      fill: 'red',
+      fill: 'skyblue',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
 
     Label({
@@ -430,7 +430,8 @@ phina.main(function() {
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
         // 'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
         // 'background': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
-        'background': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
+        // 'background': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
+        'background': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
       },
     },
   });
