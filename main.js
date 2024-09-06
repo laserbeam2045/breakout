@@ -30,24 +30,83 @@ phina.define("TitleScene", {
       text: '誰の写真か当てるげーむ',
       fontSize: 50,
       fill: 'white',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
+    }).addChildTo(this).setPosition(this.gridX.center(), 100);
 
+    // ステージ選択のタイトル
     Label({
-      text: 'Press Space to Start',
-      fontSize: 32,
+      text: 'ステージを選択してください',
+      fontSize: 40,
       fill: 'white',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
-  },
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(3));
 
-  update: function(app) {
-    this.on('pointend', () => {
-      this.exit('main');  // メインシーンに移動
+    // ステージ1のボタン
+    Button({
+      text: 'ステージ 1',
+      width: 200,
+      height: 80,
+      fontSize: 30,
+      fill: 'lightblue',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(6)).on('push', () => {
+      this.exit('main', { stage: 1 });
     });
-    if (app.keyboard.getKeyDown('space')) {
-      this.exit('main');  // メインシーンに移動
-    }
+
+    // ステージ2のボタン
+    Button({
+      text: 'ステージ 2',
+      width: 200,
+      height: 80,
+      fontSize: 30,
+      fill: 'lightgreen',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(8)).on('push', () => {
+      this.exit('main', { stage: 2 });
+    });
+
+    // ステージ3のボタン
+    Button({
+      text: 'ステージ 3',
+      width: 200,
+      height: 80,
+      fontSize: 30,
+      fill: 'khaki',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(10)).on('push', () => {
+      this.exit('main', { stage: 3 });
+    });
+
+    // ステージ4のボタン
+    Button({
+      text: 'ステージ 2',
+      width: 200,
+      height: 80,
+      fontSize: 30,
+      fill: 'hotpink',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(12)).on('push', () => {
+      this.exit('main', { stage: 4 });
+    });
   },
 });
+
+// phina.define("TitleScene", {
+//   superClass: 'DisplayScene',
+
+//   init: function(options) {
+//     this.superInit(options);
+
+//     Label({
+//       text: 'Press Space to Start',
+//       fontSize: 32,
+//       fill: 'white',
+//     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
+//   },
+
+//   update: function(app) {
+//     this.on('pointend', () => {
+//       this.exit('main');  // メインシーンに移動
+//     });
+//     if (app.keyboard.getKeyDown('space')) {
+//       this.exit('main');  // メインシーンに移動
+//     }
+//   },
+// });
 
 phina.define("MainScene", {
   superClass: 'DisplayScene',
@@ -63,11 +122,38 @@ phina.define("MainScene", {
 
     // サウンドの読み込み
     this.blockBreakSound = AssetManager.get('sound', 'block_break');
+    this.ballReturnSound = AssetManager.get('sound', 'ball_return');
+
+    // ステージに応じた背景画像のみを設定
+    let backgroundImage;
+    if (options.stage === 1) {
+      backgroundImage = 'background01';
+    } else if (options.stage === 2) {
+      backgroundImage = 'background02';
+    } else if (options.stage === 3) {
+      backgroundImage = 'background03';
+    } else if (options.stage === 4) {
+      backgroundImage = 'background04';
+    }
 
     // 背景画像の上半分を表示
-    var backgroundSprite = Sprite('background').addChildTo(this)
+    var backgroundSprite = Sprite(backgroundImage).addChildTo(this)
       .setPosition(this.gridX.center(), this.gridY.center(-3) - 70) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
+
+    // ゲームの設定やスコア表示
+    this.setupGame();
+  },
+
+  setupGame: function() {
+    // ゲームの初期設定やオブジェクト配置などをここで行う
+    this.score = 0;
+
+    // this.scoreLabel = Label({
+    //   text: 'Score: 0',
+    //   fontSize: 40,
+    //   fill: 'white',
+    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(2));
 
     this.group = DisplayElement().addChildTo(this);
     var gridX = Grid(BOARD_SIZE, MAX_PER_LINE);
@@ -75,6 +161,7 @@ phina.define("MainScene", {
 
     this.createBlocks(gridX, gridY);
 
+    // パドル、ボール、ブロックなどの設定
     this.paddle = Paddle().addChildTo(this);
     this.paddle.setPosition(this.gridX.center(), this.gridY.span(13)); // バーを少し上に移動
 
@@ -99,11 +186,11 @@ phina.define("MainScene", {
 
     if (this.isGameOver || this.clearFlag) {
       this.on('pointend', () => {
-        if (this.endFlag) this.exit('main');
+        if (this.endFlag) this.exit('title');
         setTimeout(() => this.endFlag = true, 500);
       });
       if (app.keyboard.getKeyDown('space')) {
-        this.exit('main');
+        this.exit('title');
       }
       return;
     }
@@ -231,6 +318,9 @@ phina.define("MainScene", {
       
       // ボールの速度を保つために正規化
       ball.direction.normalize();
+
+      // サウンドをプレイ
+      // this.ballReturnSound.play();
   
       // ボールが1つだけの場合に分裂させる
       if (this.balls.length === 1 && Math.random() < 0.5) {
@@ -269,6 +359,9 @@ phina.define("MainScene", {
   
     block.remove();
 
+    // スコアを加算 (例えばブロック1つあたり100点)
+    this.score += 100;
+
     // サウンドを再生
     this.blockBreakSound.play();
   
@@ -299,7 +392,7 @@ phina.define("MainScene", {
     this.clearFlag = true;
 
     Label({
-      text: 'Game Clear!',
+      text: 'Game Clear!\nScore: ' + this.score,
       fontSize: 64,
       fill: 'skyblue',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
@@ -315,9 +408,9 @@ phina.define("MainScene", {
     this.isGameOver = true;
 
     Label({
-      text: 'Game Over',
+      text: 'Game Over\nScore: ' + this.score,
       fontSize: 64,
-      fill: 'red',
+      fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
 
     Label({
@@ -431,20 +524,21 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
-        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
-        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
-        // 'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
-        // 'background': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
-        // 'background': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
-        // 'background': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
-        // 'background': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
-        // 'background': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
-        // 'background': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
-        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
+        'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
+        'background02': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
+        'background03': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
+        'background04': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+        'background05': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
+        'background06': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
+        'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
+        'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
+        'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
+        'background10': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
+        'background11': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
       },
       sound: {
         'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
+        'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
       },
     },
   });
