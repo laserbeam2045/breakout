@@ -12,6 +12,7 @@ var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 24;  // ボールのスピードを少し上げる
 var BALL_NUMBER     = 5;  // ボールの数
+var SPLIT_COUNT     = 5;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -272,7 +273,7 @@ phina.define("MainScene", {
 
   // ボールを3つに分裂させる関数
   splitBall: function(originalBall) {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < SPLIT_COUNT - 1; i++) {
       // 新しいボールを作成
       let newBall = Ball().addChildTo(this);
       
@@ -410,7 +411,8 @@ phina.main(function() {
       image: {
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
         // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
-        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
+        // 'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
+        'background': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
       },
     },
   });
