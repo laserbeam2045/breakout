@@ -74,8 +74,8 @@ phina.define("MainScene", {
 
     // 背景画像の上半分を表示
     var backgroundSprite = Sprite('background').addChildTo(this)
-      .setPosition(this.gridX.center(), this.gridY.center(-3)) // 画面上部に配置
-      .setSize(SCREEN_WIDTH - 200, SCREEN_HEIGHT / 2 - 100); // 高さを画面の半分に設定
+      .setPosition(this.gridX.center(), this.gridY.center(-3) - 20) // 画面上部に配置
+      .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
 
     // グループ
     this.group = DisplayElement().addChildTo(this);
@@ -106,7 +106,7 @@ phina.define("MainScene", {
     this.time += app.deltaTime;
 
     // ゲームオーバー時には更新処理を停止
-    if (this.isGameOver) {
+    if (this.isGameOver || this.clearFlag) {
       this.on('pointend', () => {
         if (this.endFlag) this.exit('main');  // スペースキーでシーンをリセットまたはタイトルに戻る
         setTimeout(() => this.endFlag = true, 500)
@@ -267,7 +267,7 @@ phina.define("MainScene", {
       ball.direction.y = -Math.abs(ball.direction.x); // 反射角度を考慮してY方向の速度を調整
       ball.direction.normalize();
     
-      this.ballSpeed = Math.min(this.ballSpeed + 1, 24);
+      this.ballSpeed = Math.min(this.ballSpeed + (0.1 * this.time / 1000), 20);
     }
   },
 
@@ -306,7 +306,20 @@ phina.define("MainScene", {
   },
 
   gameClear: function() {
-    this.exit(); // ゲームクリア後に次のシーンへ移動
+    this.clearFlag = true
+
+    // 「Game Over」の表示
+    Label({
+      text: 'Game Clear',
+      fontSize: 64,
+      fill: 'red',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
+
+    Label({
+      text: 'Press Space to Retry',
+      fontSize: 32,
+      fill: 'white',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
   },
 });
 
@@ -319,6 +332,33 @@ phina.define("GameOverScene", {
     // ゲームオーバー表示
     Label({
       text: 'Game Over',
+      fontSize: 64,
+      fill: 'red',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
+
+    Label({
+      text: 'Press Space to Retry',
+      fontSize: 32,
+      fill: 'white',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 100);
+  },
+
+  update: function(app) {
+    if (app.keyboard.getKeyDown('space')) {
+      this.exit();  // タイトルシーンに戻るか、再挑戦シーンに移動
+    }
+  },
+});
+
+phina.define("ClearScene", {
+  superClass: 'DisplayScene',
+
+  init: function(options) {
+    this.superInit(options);
+
+    // ゲームオーバー表示
+    Label({
+      text: 'Clear Over',
       fontSize: 64,
       fill: 'red',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
@@ -379,9 +419,14 @@ phina.define('Ball', {
 
   reflectX: function() {
     this.direction.x *= -1;
+    this.speedUp();
   },
   reflectY: function() {
     this.direction.y *= -1;
+    this.speedUp();
+  },
+  speedUp: function() {
+    this.speed = Math.min(this.speed + 0.5, 28); // 最大スピードを設定
   },
 });
 
@@ -427,7 +472,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://ecotopia.earth/wp-content/uploads/4692-2.jpg',
+        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Leonardo_da_Vinci_%281452-1519%29_-_The_Last_Supper_%281495-1498%29.jpg/1920px-Leonardo_da_Vinci_%281452-1519%29_-_The_Last_Supper_%281495-1498%29.jpg',
       },
     },
   });
