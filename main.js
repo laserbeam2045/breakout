@@ -23,7 +23,7 @@ phina.define("TitleScene", {
 
     // タイトル表示
     Label({
-      text: '何の絵か当てろげーむ',
+      text: '誰の写真か当てろげーむ',
       fontSize: 50,
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
@@ -472,7 +472,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Paul_Gauguin_-_D%27ou_venons-nous.jpg/1920px-Paul_Gauguin_-_D%27ou_venons-nous.jpg',
+        'background': 'https://news.mynavi.jp/techplus/article/gagarin-5/title_images/title.jpg',
       },
     },
   });
