@@ -472,7 +472,7 @@ phina.main(function() {
     debug: false,
     assets: {
       image: {
-        'background': 'https://news.mynavi.jp/techplus/article/gagarin-5/title_images/title.jpg',
+        'background': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
       },
     },
   });
