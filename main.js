@@ -433,7 +433,8 @@ phina.main(function() {
         // 'background': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
         // 'background': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
         // 'background': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
-        'background': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
+        // 'background': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
+        'background': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
       },
     },
   });
