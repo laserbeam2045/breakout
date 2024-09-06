@@ -3,9 +3,9 @@ phina.globalize();
 // 変数の定義
 var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
-var MAX_PER_LINE    = 20;
-var BLOCK_NUM       = MAX_PER_LINE * 15;
-var BLOCK_SIZE      = 26.5;
+var MAX_PER_LINE    = 25;
+var BLOCK_NUM       = MAX_PER_LINE * 25;
+var BLOCK_SIZE      = 21.5;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
@@ -15,7 +15,7 @@ var BALL_NUMBER     = 5;  // ボールの数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
-var BOARD_OFFSET_Y  = 80;
+var BOARD_OFFSET_Y  = 70;
 
 phina.define("TitleScene", {
   superClass: 'DisplayScene',
