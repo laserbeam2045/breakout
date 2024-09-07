@@ -315,13 +315,15 @@ phina.define("MainScene", {
   },
 
   createBlocks: function(gridX, gridY) {
+    let bonusFlag = false;
+
     (BLOCK_NUM).times(function(i) {
       var xIndex = i % MAX_PER_LINE;
       var yIndex = Math.floor(i / MAX_PER_LINE);
       var colorAngle = (360 / BLOCK_NUM) * i;
 
       // 低確率でボーナスブロック（5%の確率）
-      const isBonusBlock = Math.random() < 0.05;
+      const isBonusBlock = !bonusFlag && Math.random() < 0.005 && (bonusFlag = true);
 
       if (isBonusBlock) {
         block = BonusBlock().addChildTo(this.group).setPosition(
@@ -536,7 +538,7 @@ phina.define('BonusBlock', {
     this.superInit({
       width: BLOCK_SIZE,
       height: BLOCK_SIZE,
-      fill: 'gold',  // 金色のボーナスブロック
+      fill: 'black',  // 金色のボーナスブロック
       stroke: null,
       cornerRadius: 3,
     });
