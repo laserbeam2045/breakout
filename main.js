@@ -3,9 +3,9 @@ phina.globalize();
 // 変数の定義
 var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
-var MAX_PER_LINE    = 25;
-var BLOCK_NUM       = MAX_PER_LINE * 25;
-var BLOCK_SIZE      = 21.5;
+var MAX_PER_LINE    = 20;
+var BLOCK_NUM       = MAX_PER_LINE * 15;
+var BLOCK_SIZE      = 26.75;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
@@ -14,11 +14,37 @@ var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
-var SPLIT_COUNT_B   = 5;  // 分裂する数
+var SPLIT_COUNT_B   = 7;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
 var BOARD_OFFSET_Y  = 70;
+
+// アセットの定義を1回で行う
+const assets = {
+  image: {
+    // エジソン
+    'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
+    // モーツァルト
+    'background02': 'https://cdn-blob.austria.info/cms-uploads-prod/default/0002/92/thumb_191548_default_header_big.jpeg',
+    // 大谷翔平
+    'background03': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+    // ピカソ
+    'background04': 'https://cdn.shopify.com/s/files/1/0554/9057/6433/files/e8131b5f33b316a85a80c11dd0872991_480x480.jpg?v=1713847065',
+    // 藤井聡太
+    'background05': 'https://cdn.mainichi.jp/vol1/2023/05/23/20230523mpj00m040014000p/9.jpg?1',
+    // アインシュタイン
+    'background06': 'https://i.ytimg.com/vi/YX72DdfSdMU/maxresdefault.jpg',
+  },
+  sound: {
+    'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
+    // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
+    // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
+  },
+};
+
+// ステージ数を画像の数に応じて設定
+const stageCount = Object.keys(assets.image).length;
 
 phina.define("TitleScene", {
   superClass: 'DisplayScene',
@@ -41,7 +67,6 @@ phina.define("TitleScene", {
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(3));
 
     // ステージボタンの設定 (3列×4行で表示)
-    const stages = 5;  // 12種類のステージ
     const buttonWidth = 180;
     const buttonHeight = 80;
     const buttonSpacingX = (SCREEN_WIDTH - buttonWidth * 3) / 4;  // 3列の間隔
@@ -55,7 +80,7 @@ phina.define("TitleScene", {
     const hueStart = 0;  // 色相の開始値 (赤)
     const hueStep = 30;  // 各ボタンごとに色相を30度ずつ変化させる
 
-    for (let i = 0; i < stages; i++) {
+    for (let i = 0; i < stageCount; i++) {
       const col = i % 3;  // 列
       const row = Math.floor(i / 3);  // 行
 
@@ -116,7 +141,7 @@ phina.define("MainScene", {
 
     // サウンドの読み込み
     this.blockBreakSound = AssetManager.get('sound', 'block_break');
-    this.ballReturnSound = AssetManager.get('sound', 'ball_return');
+    // this.ballReturnSound = AssetManager.get('sound', 'ball_return');
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
     // 制限時間（秒単位で設定）
@@ -129,7 +154,7 @@ phina.define("MainScene", {
       fontSize: 30,
       fill: 'white',
       align: 'left',  // 左寄せ
-    }).addChildTo(this).setPosition(20, 20);  // 画面左上に配置
+    }).addChildTo(this).setPosition(20, 30);  // 画面左上に配置
 
     // ステージに応じた背景画像のみを設定
     let backgroundImage;
@@ -192,7 +217,7 @@ phina.define("MainScene", {
       fontSize: 30,
       fill: 'white',
       align: 'right',  // 右寄せ
-    }).addChildTo(this).setPosition(SCREEN_WIDTH - 30, 20);  // 画面右上に配置
+    }).addChildTo(this).setPosition(SCREEN_WIDTH - 30, 30);  // 画面右上に配置
 
     // パドル、ボール、ブロックなどの設定
     this.paddle = Paddle().addChildTo(this);
@@ -518,7 +543,7 @@ phina.define("MainScene", {
 
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count - 1; i++) {
       let newBall = Ball().addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
@@ -683,41 +708,7 @@ phina.main(function() {
     backgroundColor: '#444',
     autoPause: true,
     debug: false,
-    assets: {
-      // image: {
-      //   'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
-      //   'background02': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
-      //   'background03': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
-      //   'background04': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
-      //   'background05': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
-      //   'background06': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
-      //   'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
-      //   'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
-      //   'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
-      //   'background10': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
-      //   'background11': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
-      //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
-      // },
-      image: {
-        'background01': './assets/image01.png?version=0.1',
-        'background02': './assets/image02.png',
-        'background03': './assets/image03.png',
-        'background04': './assets/image04.png',
-        'background05': './assets/image05.png',
-        'background06': 'https://pbs.twimg.com/media/FbeRJM9VsAEw4tS.jpg',
-        'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
-        'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
-        'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
-        'background10': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
-        'background11': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
-        'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
-      },
-      sound: {
-        'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
-        'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
-        // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
-      },
-    },
+    assets,
   });
 
   app.run();
