@@ -186,6 +186,8 @@ phina.define("MainScene", {
     // パドル、ボール、ブロックなどの設定
     this.paddle = Paddle().addChildTo(this);
     this.paddle.setPosition(this.gridX.center(), this.gridY.span(13)); // バーを少し上に移動
+    this.paddle.prevX = this.paddle.x;  // 前フレームの位置を保持
+    this.paddleSpeed = 0;  // パドルの速度
 
     // ボールを3つ作成
     this.balls = [];
@@ -243,6 +245,10 @@ phina.define("MainScene", {
         this.checkCollisions(ball);
         this.adjustBallAngle(ball);
       });
+
+      // パドルの速度を計算
+      this.paddleSpeed = this.paddle.x - this.paddle.prevX;  // 前フレームからの移動距離で速度を計算
+      this.paddle.prevX = this.paddle.x;  // 現在位置を次フレームに備えて保持
     }
 
     if (this.isPC) {
@@ -367,7 +373,11 @@ phina.define("MainScene", {
   
       // X方向の反射（左右反転）
       ball.reflectY();  // Y方向の反射
-      
+
+      // パドルの速度に基づいてスピンを加える
+      const spinFactor = 0.1;  // スピンの強さを調整する係数
+      ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
+
       // ボールの速度を保つために正規化
       ball.direction.normalize();
 
@@ -375,7 +385,7 @@ phina.define("MainScene", {
       // this.ballReturnSound.play();
   
       // ボールが1つだけの場合に分裂させる
-      if (this.balls.length === 1 && Math.random() < 0.5) {
+      if (this.balls.length === 1 && Math.random() < 1.0) {
         this.splitBall(ball);
       }
     }
