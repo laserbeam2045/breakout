@@ -10,8 +10,8 @@ var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
-var BALL_SPEED      = 18;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 26;
+var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
+var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT     = 5;  // 分裂する数
 
@@ -40,7 +40,7 @@ phina.define("TitleScene", {
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(3));
 
     // ステージボタンの設定 (3列×4行で表示)
-    const stages = 12;  // 12種類のステージ
+    const stages = 6;  // 12種類のステージ
     const buttonWidth = 180;
     const buttonHeight = 80;
     const buttonSpacingX = (SCREEN_WIDTH - buttonWidth * 3) / 4;  // 3列の間隔
@@ -534,7 +534,7 @@ phina.define('Ball', {
   },
 
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.5, MAX_BALL_SPEED);  // 最大スピードを設定
+    this.speed = Math.min(this.speed + 0.1, MAX_BALL_SPEED);  // 最大スピードを設定
   },
 });
 
@@ -576,13 +576,27 @@ phina.main(function() {
     autoPause: true,
     debug: false,
     assets: {
+      // image: {
+      //   'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
+      //   'background02': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
+      //   'background03': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
+      //   'background04': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+      //   'background05': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
+      //   'background06': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
+      //   'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
+      //   'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
+      //   'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
+      //   'background10': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
+      //   'background11': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
+      //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
+      // },
       image: {
-        'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
-        'background02': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_TOP6051300000M.jpg',
-        'background03': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_painter_BMN7062200002M.jpg',
-        'background04': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
-        'background05': 'https://p.potaufeu.asahi.com/599f-p/picture/27390317/3dc18d38ffe4d63531a93868d68ab0f0_640px.jpg',
-        'background06': 'https://yuraku-group.jp/wp-content/uploads/2021/08/2021.08.20_shinden_blog_2.jpg',
+        'background01': 'https://asoppa.com/html/user_data/recipe/3907/1111003425_636d9891ede99.png',
+        'background02': 'https://asoppa.com/html/user_data/recipe/3833/0516051715_6281de5b2d6b3.png',
+        'background03': 'https://noikiiki.info/wp-content/uploads/2021/01/arunashi1-1-1024x724.jpg',
+        'background04': 'https://高齢者クイズ.jp/wp-content/uploads/2020/12/%EF%BC%92-1.png',
+        'background05': 'https://cdn-ak.f.st-hatena.com/images/fotolife/H/Hijiri_rain/20201107/20201107181408.png',
+        'background06': 'https://pbs.twimg.com/media/FbeRJM9VsAEw4tS.jpg',
         'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
         'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
         'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
@@ -593,7 +607,7 @@ phina.main(function() {
       sound: {
         'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
         'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
-        'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
+        // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
       },
     },
   });
