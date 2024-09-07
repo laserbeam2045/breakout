@@ -14,7 +14,7 @@ var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
-var SPLIT_COUNT_B   = 7;  // 分裂する数
+var SPLIT_COUNT_B   = 3;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -145,7 +145,7 @@ phina.define("MainScene", {
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
     // 制限時間（秒単位で設定）
-    this.timeLimit = 60;  // 60秒の制限時間
+    this.timeLimit = 45;  // 60秒の制限時間
     this.remainingTime = this.timeLimit;  // 残り時間を初期化
 
     // 制限時間表示用のラベルを左上に追加
@@ -398,7 +398,8 @@ phina.define("MainScene", {
       var colorAngle = (360 / BLOCK_NUM) * i;
 
       // 低確率でボーナスブロック（5%の確率）
-      const isBonusBlock = bonusCount < bonusMaxCount && Math.random() < 0.01 && (bonusCount += 1);
+      // const isBonusBlock = bonusCount < bonusMaxCount && Math.random() < 0.01 && (bonusCount += 1);
+      const isBonusBlock = false;
 
       if (isBonusBlock) {
         block = BonusBlock().addChildTo(this.group).setPosition(
@@ -484,11 +485,8 @@ phina.define("MainScene", {
 
       // 金色のボールの場合は再度分裂
       if (ball.isGolden) {
-        this.splitBall(ball, 5);  // 金色のボールが再度3つに分裂
-      }
-
-      if (ball.isGolden) {
         ball.isGolden = false;
+        this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
       }
 
       // ボールが1つだけの場合に分裂させる
@@ -551,10 +549,14 @@ phina.define("MainScene", {
     }
   },
 
+  hasGoldenBall: function() {
+    return this.balls.some(ball => ball.isGolden)
+  },
+
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
-      const isGolden = Math.random() < 0.05;  // 最初のボールを金色に設定
+      const isGolden = !this.hasGoldenBall();  // 最初のボールを金色に設定
       let newBall = Ball(isGolden).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
