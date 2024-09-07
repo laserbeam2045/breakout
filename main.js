@@ -41,7 +41,7 @@ phina.define("TitleScene", {
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(3));
 
     // ステージボタンの設定 (3列×4行で表示)
-    const stages = 6;  // 12種類のステージ
+    const stages = 5;  // 12種類のステージ
     const buttonWidth = 180;
     const buttonHeight = 80;
     const buttonSpacingX = (SCREEN_WIDTH - buttonWidth * 3) / 4;  // 3列の間隔
@@ -700,10 +700,10 @@ phina.main(function() {
       // },
       image: {
         'background01': './assets/image01.png',
-        'background02': 'https://asoppa.com/html/user_data/recipe/3833/0516051715_6281de5b2d6b3.png',
-        'background03': 'https://noikiiki.info/wp-content/uploads/2021/01/arunashi1-1-1024x724.jpg',
-        'background04': 'https://高齢者クイズ.jp/wp-content/uploads/2020/12/%EF%BC%92-1.png',
-        'background05': 'https://cdn-ak.f.st-hatena.com/images/fotolife/H/Hijiri_rain/20201107/20201107181408.png',
+        'background02': './assets/image02.png',
+        'background03': './assets/image03.png',
+        'background04': './assets/image04.png',
+        'background05': './assets/image05.png',
         'background06': 'https://pbs.twimg.com/media/FbeRJM9VsAEw4tS.jpg',
         'background07': 'https://p.potaufeu.asahi.com/db98-p/picture/26727803/9c47f9cf8fe6ba7683abf0f26355cfe4_640px.jpg',
         'background08': 'https://jprime.ismcdn.jp/mwimgs/b/a/620mw/img_badbd8482db20075cf5e713a3493301b1755033.png',
