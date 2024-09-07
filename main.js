@@ -699,7 +699,7 @@ phina.main(function() {
       //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
       // },
       image: {
-        'background01': './assets/image01.png',
+        'background01': './assets/image01.png?version=0.1',
         'background02': './assets/image02.png',
         'background03': './assets/image03.png',
         'background04': './assets/image04.png',
