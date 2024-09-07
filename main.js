@@ -13,7 +13,7 @@ var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
-var SPLIT_COUNT     = 10;  // 分裂する数
+var SPLIT_COUNT     = 100;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
