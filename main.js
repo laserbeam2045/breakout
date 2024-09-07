@@ -538,7 +538,7 @@ phina.define('BonusBlock', {
     this.superInit({
       width: BLOCK_SIZE,
       height: BLOCK_SIZE,
-      fill: 'black',  // 金色のボーナスブロック
+      fill: 'gold',  // 金色のボーナスブロック
       stroke: null,
       cornerRadius: 3,
     });
