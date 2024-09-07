@@ -567,7 +567,7 @@ phina.define("MainScene", {
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
       const isGolden = !this.hasGoldenBall();  // 最初のボールを金色に設定
-      const isPurple = !isGolden && !this.hasPurpleBall() && Math.random() < 0.2;
+      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.2;
       let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
