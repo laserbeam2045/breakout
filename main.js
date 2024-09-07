@@ -7,7 +7,7 @@ var MAX_PER_LINE    = 25;
 var BLOCK_NUM       = MAX_PER_LINE * 25;
 var BLOCK_SIZE      = 21.5;
 var BOARD_PADDING   = 50;
-var PADDLE_WIDTH    = 200;
+var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
@@ -245,6 +245,11 @@ phina.define("MainScene", {
       }
     }
 
+    if (this.isGameOver || this.clearFlag) {
+      // ゲームオーバーまたはクリア時にボールをすべて消去
+      this.removeAllBalls();
+    }
+
     if (!this.gameStarted && app.keyboard.getKeyDown('space')) {
       this.startGame();
     }
@@ -287,6 +292,14 @@ phina.define("MainScene", {
     }
   },
 
+  // ボールを全て消す関数
+  removeAllBalls: function() {
+    this.balls.forEach(ball => {
+      ball.remove();  // シーンからボールを削除
+    });
+    this.balls = [];  // ボール配列を空にする
+  },
+
   playBGM: function() {
     // BGMをSoundオブジェクトでロード
     this.bgm = Sound();
@@ -315,7 +328,7 @@ phina.define("MainScene", {
   },
 
   createBlocks: function(gridX, gridY) {
-    let bonusFlag = false;
+    let bonusCount = 0;
 
     (BLOCK_NUM).times(function(i) {
       var xIndex = i % MAX_PER_LINE;
@@ -323,7 +336,7 @@ phina.define("MainScene", {
       var colorAngle = (360 / BLOCK_NUM) * i;
 
       // 低確率でボーナスブロック（5%の確率）
-      const isBonusBlock = !bonusFlag && Math.random() < 0.005 && (bonusFlag = true);
+      const isBonusBlock = bonusCount < 5 && Math.random() < 0.005 && (bonusCount += 1);
 
       if (isBonusBlock) {
         block = BonusBlock().addChildTo(this.group).setPosition(
@@ -409,7 +422,7 @@ phina.define("MainScene", {
   
       // ボールが1つだけの場合に分裂させる
       if (this.balls.length === 1 && Math.random() < 1.0) {
-        this.splitBall(ball);
+        this.splitBall(ball, SPLIT_COUNT);
       }
     }
   },
@@ -452,7 +465,7 @@ phina.define("MainScene", {
 
     // ボーナスブロックだった場合、ボールを100個に分裂
     if (block.isBonusBlock) {
-      this.splitBall(ball, 100);  // 100個に分裂
+      this.splitBall(ball, 20);  // 100個に分裂
     }
 
     // スコアを加算 (例えばブロック1つあたり100点)
