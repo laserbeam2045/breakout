@@ -13,7 +13,8 @@ var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
-var SPLIT_COUNT     = 7;  // 分裂する数
+var SPLIT_COUNT_A   = 3;  // 分裂する数
+var SPLIT_COUNT_B   = 5;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -207,7 +208,7 @@ phina.define("MainScene", {
     //   this.balls.push(ball);
     // }
     // ボールを上方向に斜めにタイミングをずらして発射
-    this.createBallsWithDelay(10, 100);  // ボール20個を100msずつ遅らせて発射
+    this.createBallsWithDelay(3, 100);  // ボール20個を100msずつ遅らせて発射
 
     this.paddle.hold(this.balls[0]);
 
@@ -363,6 +364,7 @@ phina.define("MainScene", {
 
   createBlocks: function(gridX, gridY) {
     let bonusCount = 0;
+    const bonusMaxCount = 21;
 
     (BLOCK_NUM).times(function(i) {
       var xIndex = i % MAX_PER_LINE;
@@ -370,7 +372,7 @@ phina.define("MainScene", {
       var colorAngle = (360 / BLOCK_NUM) * i;
 
       // 低確率でボーナスブロック（5%の確率）
-      const isBonusBlock = bonusCount < 5 && Math.random() < 0.005 && (bonusCount += 1);
+      const isBonusBlock = bonusCount < bonusMaxCount && Math.random() < 0.005 && (bonusCount += 1);
 
       if (isBonusBlock) {
         block = BonusBlock().addChildTo(this.group).setPosition(
@@ -456,7 +458,7 @@ phina.define("MainScene", {
   
       // ボールが1つだけの場合に分裂させる
       if (this.balls.length === 1 && Math.random() < 1.0) {
-        this.splitBall(ball, SPLIT_COUNT);
+        this.splitBall(ball, SPLIT_COUNT_A);
       }
     }
   },
@@ -499,7 +501,7 @@ phina.define("MainScene", {
 
     // ボーナスブロックだった場合、ボールを100個に分裂
     if (block.isBonusBlock) {
-      this.splitBall(ball, 20);  // 100個に分裂
+      this.splitBall(ball, SPLIT_COUNT_B);
     }
 
     // スコアを加算 (例えばブロック1つあたり100点)
@@ -510,7 +512,7 @@ phina.define("MainScene", {
   
     // ボールが1つだけの場合に分裂させる
     if (this.balls.length === 1 && Math.random() < 1.0) {
-      this.splitBall(ball, SPLIT_COUNT);
+      this.splitBall(ball, SPLIT_COUNT_A);
     }
   },
 
@@ -697,7 +699,7 @@ phina.main(function() {
       //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
       // },
       image: {
-        'background01': 'https://stat.ameba.jp/user_images/20141103/19/avanzer-hg-blog/23/66/j/o0800056513118215108.jpg?caw=800',
+        'background01': 'https://i.ytimg.com/vi/2tsBGcO1OM0/maxresdefault.jpg',
         'background02': 'https://asoppa.com/html/user_data/recipe/3833/0516051715_6281de5b2d6b3.png',
         'background03': 'https://noikiiki.info/wp-content/uploads/2021/01/arunashi1-1-1024x724.jpg',
         'background04': 'https://高齢者クイズ.jp/wp-content/uploads/2020/12/%EF%BC%92-1.png',
