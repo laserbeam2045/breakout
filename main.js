@@ -484,7 +484,7 @@ phina.define("MainScene", {
 
       // 金色のボールの場合は再度分裂
       if (ball.isGolden) {
-        this.splitBall(ball, 3);  // 金色のボールが再度3つに分裂
+        this.splitBall(ball, 5);  // 金色のボールが再度3つに分裂
       }
 
       if (ball.isGolden) {
@@ -554,7 +554,7 @@ phina.define("MainScene", {
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
-      const isGolden = Math.random() < 0.1;  // 最初のボールを金色に設定
+      const isGolden = Math.random() < 0.05;  // 最初のボールを金色に設定
       let newBall = Ball(isGolden).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
@@ -567,6 +567,8 @@ phina.define("MainScene", {
   gameClear: function() {
     this.clearFlag = true;
     this.removeAllBalls();
+
+    this.score += Math.floor(this.remainingTime * 100);
 
     Label({
       text: 'Game Clear!\nScore: ' + this.score,
@@ -584,6 +586,8 @@ phina.define("MainScene", {
   gameOver: function() {
     this.isGameOver = true;
     // this.bgm.pause();  // BGMを停止
+
+    this.score += Math.floor(this.remainingTime * 100);
 
     Label({
       text: 'Game Over\nScore: ' + this.score,
