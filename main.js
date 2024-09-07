@@ -183,6 +183,16 @@ phina.define("MainScene", {
 
     this.createBlocks(gridX, gridY);
 
+    this.remainingBlocks = BLOCK_NUM;
+
+    // 残りブロック数の表示用ラベル
+    this.remainingBlocksLabel = Label({
+      text: 'Blocks: ' + this.remainingBlocks,
+      fontSize: 30,
+      fill: 'white',
+      align: 'right',  // 右寄せ
+    }).addChildTo(this).setPosition(SCREEN_WIDTH - 30, 20);  // 画面右上に配置
+
     // パドル、ボール、ブロックなどの設定
     this.paddle = Paddle().addChildTo(this);
     this.paddle.setPosition(this.gridX.center(), this.gridY.span(13)); // バーを少し上に移動
@@ -420,6 +430,12 @@ phina.define("MainScene", {
     }
   
     block.remove();
+
+    // 残りブロック数を減らす
+    this.remainingBlocks--;
+
+    // ラベルを更新
+    this.remainingBlocksLabel.text = 'Blocks: ' + this.remainingBlocks;
 
     // スコアを加算 (例えばブロック1つあたり100点)
     this.score += 100;
