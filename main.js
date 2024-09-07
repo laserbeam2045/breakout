@@ -372,7 +372,7 @@ phina.define("MainScene", {
       var colorAngle = (360 / BLOCK_NUM) * i;
 
       // 低確率でボーナスブロック（5%の確率）
-      const isBonusBlock = bonusCount < bonusMaxCount && Math.random() < 0.005 && (bonusCount += 1);
+      const isBonusBlock = bonusCount < bonusMaxCount && Math.random() < 0.01 && (bonusCount += 1);
 
       if (isBonusBlock) {
         block = BonusBlock().addChildTo(this.group).setPosition(
