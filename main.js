@@ -145,7 +145,7 @@ phina.define("MainScene", {
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
     // 制限時間（秒単位で設定）
-    this.timeLimit = 45;  // 60秒の制限時間
+    this.timeLimit = 30;
     this.remainingTime = this.timeLimit;  // 残り時間を初期化
 
     // 制限時間表示用のラベルを左上に追加
@@ -485,7 +485,7 @@ phina.define("MainScene", {
 
       // 金色のボールの場合は再度分裂
       if (ball.isGolden) {
-        ball.isGolden = false;
+        // ball.isGolden = false;
         this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
       }
 
