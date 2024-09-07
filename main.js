@@ -699,7 +699,7 @@ phina.main(function() {
       //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
       // },
       image: {
-        'background01': 'https://i.ytimg.com/vi/2tsBGcO1OM0/maxresdefault.jpg',
+        'background01': './assets/image01.png',
         'background02': 'https://asoppa.com/html/user_data/recipe/3833/0516051715_6281de5b2d6b3.png',
         'background03': 'https://noikiiki.info/wp-content/uploads/2021/01/arunashi1-1-1024x724.jpg',
         'background04': 'https://高齢者クイズ.jp/wp-content/uploads/2020/12/%EF%BC%92-1.png',
