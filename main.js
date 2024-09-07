@@ -13,7 +13,7 @@ var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
-var SPLIT_COUNT     = 100;  // 分裂する数
+var SPLIT_COUNT     = 10;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -319,10 +319,21 @@ phina.define("MainScene", {
       var xIndex = i % MAX_PER_LINE;
       var yIndex = Math.floor(i / MAX_PER_LINE);
       var colorAngle = (360 / BLOCK_NUM) * i;
-      var block = Block(colorAngle).addChildTo(this.group).setPosition(
-        gridX.span(xIndex) + BOARD_OFFSET_X,
-        gridY.span(yIndex) + BOARD_OFFSET_Y
-      );
+
+      // 低確率でボーナスブロック（5%の確率）
+      const isBonusBlock = Math.random() < 0.05;
+
+      if (isBonusBlock) {
+        block = BonusBlock().addChildTo(this.group).setPosition(
+          gridX.span(xIndex) + BOARD_OFFSET_X,
+          gridY.span(yIndex) + BOARD_OFFSET_Y
+        );
+      } else {
+        block = Block(colorAngle).addChildTo(this.group).setPosition(
+          gridX.span(xIndex) + BOARD_OFFSET_X,
+          gridY.span(yIndex) + BOARD_OFFSET_Y
+        );
+      }
     }, this);
   },
 
@@ -437,6 +448,11 @@ phina.define("MainScene", {
     // ラベルを更新
     this.remainingBlocksLabel.text = 'Blocks: ' + this.remainingBlocks;
 
+    // ボーナスブロックだった場合、ボールを100個に分裂
+    if (block.isBonusBlock) {
+      this.splitBall(ball, 100);  // 100個に分裂
+    }
+
     // スコアを加算 (例えばブロック1つあたり100点)
     this.score += 100;
 
@@ -445,24 +461,20 @@ phina.define("MainScene", {
   
     // ボールが1つだけの場合に分裂させる
     if (this.balls.length === 1 && Math.random() < 1.0) {
-      this.splitBall(ball);
+      this.splitBall(ball, SPLIT_COUNT);
     }
   },
 
-  // ボールを3つに分裂させる関数
-  splitBall: function(originalBall) {
-    for (let i = 0; i < SPLIT_COUNT - 1; i++) {
-      // 新しいボールを作成
+  // ボールを指定した数に分裂させる関数
+  splitBall: function(originalBall, count) {
+    for (let i = 0; i < count; i++) {
       let newBall = Ball().addChildTo(this);
-      
-      // 元のボールの位置に新しいボールを配置
       newBall.setPosition(originalBall.x, originalBall.y);
-      
-      // 新しい角度で射出 (少し角度を変える)
+
+      // 角度をランダムに設定して射出
       newBall.direction = Vector2(Math.random() * 2 - 1, -1).normalize();
-      
-      // 新しいボールをボールリストに追加
-      this.balls.push(newBall);
+
+      this.balls.push(newBall);  // 新しいボールをボールリストに追加
     }
   },
 
@@ -500,6 +512,7 @@ phina.define("MainScene", {
   },
 });
 
+// 通常のブロック
 phina.define('Block', {
   superClass: 'RectangleShape',
 
@@ -511,6 +524,23 @@ phina.define('Block', {
       stroke: null,
       cornerRadius: 3,
     });
+    this.isBonusBlock = false;  // 通常のブロックはボーナスブロックではない
+  },
+});
+
+// ボーナスブロック（低確率で出現）
+phina.define('BonusBlock', {
+  superClass: 'RectangleShape',
+
+  init: function() {
+    this.superInit({
+      width: BLOCK_SIZE,
+      height: BLOCK_SIZE,
+      fill: 'gold',  // 金色のボーナスブロック
+      stroke: null,
+      cornerRadius: 3,
+    });
+    this.isBonusBlock = true;  // ボーナスブロックであることを示す
   },
 });
 
