@@ -27,7 +27,7 @@ phina.define("TitleScene", {
 
     // タイトル表示
     Label({
-      text: '誰の写真か当てるげーむ',
+      text: '何の写真か当てるげーむ',
       fontSize: 50,
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), 100);
@@ -39,49 +39,42 @@ phina.define("TitleScene", {
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(3));
 
-    // ステージ1のボタン
-    Button({
-      text: 'ステージ 1',
-      width: 200,
-      height: 80,
-      fontSize: 30,
-      fill: 'lightblue',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(6)).on('push', () => {
-      this.exit('main', { stage: 1 });
-    });
+    // ステージボタンの設定 (3列×4行で表示)
+    const stages = 12;  // 12種類のステージ
+    const buttonWidth = 180;
+    const buttonHeight = 80;
+    const buttonSpacingX = (SCREEN_WIDTH - buttonWidth * 3) / 4;  // 3列の間隔
+    const buttonSpacingY = 120;  // 各行のボタン間隔
 
-    // ステージ2のボタン
-    Button({
-      text: 'ステージ 2',
-      width: 200,
-      height: 80,
-      fontSize: 30,
-      fill: 'lightgreen',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(8)).on('push', () => {
-      this.exit('main', { stage: 2 });
-    });
+    // ボタンを配置する開始位置（少し上に配置）
+    const startX = buttonSpacingX + buttonWidth / 2;
+    const startY = 300;
 
-    // ステージ3のボタン
-    Button({
-      text: 'ステージ 3',
-      width: 200,
-      height: 80,
-      fontSize: 30,
-      fill: 'khaki',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(10)).on('push', () => {
-      this.exit('main', { stage: 3 });
-    });
+    // ボタンの色を変化させるための色相の開始値と変化量
+    const hueStart = 0;  // 色相の開始値 (赤)
+    const hueStep = 30;  // 各ボタンごとに色相を30度ずつ変化させる
 
-    // ステージ4のボタン
-    Button({
-      text: 'ステージ 2',
-      width: 200,
-      height: 80,
-      fontSize: 30,
-      fill: 'hotpink',
-    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.span(12)).on('push', () => {
-      this.exit('main', { stage: 4 });
-    });
+    for (let i = 0; i < stages; i++) {
+      const col = i % 3;  // 列
+      const row = Math.floor(i / 3);  // 行
+
+      // 各ボタンに対して色相を少しずつ変更する (HSL形式)
+      const hue = (hueStart + i * hueStep) % 360;  // 色相が360度を超えたらリセット
+      const color = `hsl(${hue}, 80%, 70%)`;  // 彩度80%, 明度70%で色を設定
+
+      Button({
+        text: `ステージ ${i + 1}`,
+        width: buttonWidth,
+        height: buttonHeight,
+        fontSize: 30,
+        fill: color,  // 色を行ごとに変更
+      })
+      .addChildTo(this)
+      .setPosition(startX + col * (buttonWidth + buttonSpacingX), startY + row * buttonSpacingY)
+      .on('push', () => {
+        this.exit('main', { stage: i + 1 });
+      });
+    }
   },
 });
 
@@ -123,6 +116,19 @@ phina.define("MainScene", {
     // サウンドの読み込み
     this.blockBreakSound = AssetManager.get('sound', 'block_break');
     this.ballReturnSound = AssetManager.get('sound', 'ball_return');
+    // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
+
+    // 制限時間（秒単位で設定）
+    this.timeLimit = 60;  // 60秒の制限時間
+    this.remainingTime = this.timeLimit;  // 残り時間を初期化
+
+    // 制限時間表示用のラベルを左上に追加
+    this.timeLabel = Label({
+      text: 'Time: ' + this.remainingTime,
+      fontSize: 30,
+      fill: 'white',
+      align: 'left',  // 左寄せ
+    }).addChildTo(this).setPosition(20, 20);  // 画面左上に配置
 
     // ステージに応じた背景画像のみを設定
     let backgroundImage;
@@ -134,10 +140,26 @@ phina.define("MainScene", {
       backgroundImage = 'background03';
     } else if (options.stage === 4) {
       backgroundImage = 'background04';
+    } else if (options.stage === 5) {
+      backgroundImage = 'background05';
+    } else if (options.stage === 6) {
+      backgroundImage = 'background06';
+    } else if (options.stage === 7) {
+      backgroundImage = 'background07';
+    } else if (options.stage === 8) {
+      backgroundImage = 'background08';
+    } else if (options.stage === 9) {
+      backgroundImage = 'background09';
+    } else if (options.stage === 10) {
+      backgroundImage = 'background10';
+    } else if (options.stage === 11) {
+      backgroundImage = 'background11';
+    } else if (options.stage === 12) {
+      backgroundImage = 'background12';
     }
 
     // 背景画像の上半分を表示
-    var backgroundSprite = Sprite(backgroundImage).addChildTo(this)
+    this.backgroundSprite = Sprite(backgroundImage).addChildTo(this)
       .setPosition(this.gridX.center(), this.gridY.center(-3) - 70) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
 
@@ -185,6 +207,9 @@ phina.define("MainScene", {
     this.time += app.deltaTime;
 
     if (this.isGameOver || this.clearFlag) {
+      if (this.isGameOver) {
+        this.backgroundSprite.remove();
+      }
       this.on('pointend', () => {
         if (this.endFlag) this.exit('title');
         setTimeout(() => this.endFlag = true, 500);
@@ -193,6 +218,19 @@ phina.define("MainScene", {
         this.exit('title');
       }
       return;
+    }
+
+    if (this.gameStarted) {
+      // 毎フレーム呼ばれる。制限時間のカウントダウンを処理
+      this.remainingTime -= app.deltaTime / 1000;  // 残り時間を秒単位で減らす
+
+      // 画面に制限時間を小数点以下1桁まで表示
+      this.timeLabel.text = 'Time: ' + Math.max(0, this.remainingTime).toFixed(1);
+
+      // 残り時間が0以下になったらゲームオーバー
+      if (this.remainingTime <= 0) {
+        this.gameOver();
+      }
     }
 
     if (!this.gameStarted && app.keyboard.getKeyDown('space')) {
@@ -228,7 +266,21 @@ phina.define("MainScene", {
         ball.speed = BALL_SPEED; // ボールのスピードを設定
         ball.direction = Vector2(1, -Math.random()).normalize();
       });
+
+      // this.playBGM();
     }
+  },
+
+  playBGM: function() {
+    // BGMをSoundオブジェクトでロード
+    this.bgm = Sound();
+    // Audioオブジェクトを使ってBGMを再生
+    this.bgm = new Audio('assets/heaven_and_hell.wav');
+    this.bgm.volume = 0.33;  // 音量を50%に設定
+
+    this.bgm.playbackRate = 1.5;  // 再生速度を1.2倍に設定
+    this.bgm.currentTime = 10;
+    this.bgm.play();  // BGMを再生
   },
 
   adjustBallAngle: function(ball) {
@@ -406,6 +458,7 @@ phina.define("MainScene", {
 
   gameOver: function() {
     this.isGameOver = true;
+    // this.bgm.pause();  // BGMを停止
 
     Label({
       text: 'Game Over\nScore: ' + this.score,
@@ -535,10 +588,12 @@ phina.main(function() {
         'background09': 'https://jprime.ismcdn.jp/mwimgs/7/9/620mw/img_797f78fe641735b2a478271b2638d6d81978401.png',
         'background10': 'https://renote.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6NzQ1MDM3MiwicHVyIjoiYmxvYl9pZCJ9fQ==--ee97d92891c4bad1ab1f1deeaa0bcd5e82e6eeda/7bc70217.jpg',
         'background11': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Raffael_058.jpg/400px-Raffael_058.jpg',
+        'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
       },
       sound: {
         'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
         'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
+        'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
       },
     },
   });
