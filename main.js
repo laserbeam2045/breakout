@@ -339,7 +339,8 @@ phina.define("MainScene", {
     for (let i = 0; i < count; i++) {
       // タイミングをずらしてボールを発射
       setTimeout(() => {
-        let ball = Ball().addChildTo(this);
+        const isGolden = i === 0 && count === SPLIT_COUNT_A;
+        let ball = Ball(isGolden).addChildTo(this);
         ball.setPosition(centerX, centerY);  // ボールをパドルの上に配置
 
         // ボールの進行方向を上方向に少しずつ角度をずらして設定
@@ -480,7 +481,16 @@ phina.define("MainScene", {
 
       // サウンドをプレイ
       // this.ballReturnSound.play();
-  
+
+      // 金色のボールの場合は再度分裂
+      if (ball.isGolden) {
+        this.splitBall(ball, 3);  // 金色のボールが再度3つに分裂
+      }
+
+      if (ball.isGolden) {
+        ball.isGolden = false;
+      }
+
       // ボールが1つだけの場合に分裂させる
       if (this.balls.length === 1 && Math.random() < 1.0) {
         this.splitBall(ball, SPLIT_COUNT_A);
@@ -544,13 +554,13 @@ phina.define("MainScene", {
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
-      let newBall = Ball().addChildTo(this);
+      const isGolden = Math.random() < 0.1;  // 最初のボールを金色に設定
+      let newBall = Ball(isGolden).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
-      // 角度をランダムに設定して射出
+      // ランダムな角度で射出
       newBall.direction = Vector2(Math.random() * 2 - 1, -1).normalize();
-
-      this.balls.push(newBall);  // 新しいボールをボールリストに追加
+      this.balls.push(newBall);
     }
   },
 
@@ -624,15 +634,16 @@ phina.define('BonusBlock', {
 phina.define('Ball', {
   superClass: 'CircleShape',
 
-  init: function() {
+  init: function(isGolden) {
     this.superInit({
       radius: BALL_RADIUS,
-      fill: 'white',
+      fill: isGolden ? 'gold' : 'white',  // 金色のボールかどうかで色を変える
       stroke: null,
     });
 
-    this.speed = BALL_SPEED;  // 初期スピードを定義
+    this.speed = BALL_SPEED;
     this.direction = Vector2(1, -1).normalize();
+    this.isGolden = isGolden || false;  // 金色かどうかのフラグ
   },
 
   // 内側に影を描画するためのカスタム描画
@@ -641,7 +652,7 @@ phina.define('Ball', {
 
     // グラデーションの作成 (内側から外側に向けて影)
     var gradient = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, this.radius);
-    gradient.addColorStop(0, 'white');  // 中心は白
+    gradient.addColorStop(0, this.isGolden ? 'gold' : 'white');  // 中心は白
     gradient.addColorStop(1, '#ccc');   // 外側はグレー (影っぽく見せる)
 
     // グラデーションで塗りつぶし
