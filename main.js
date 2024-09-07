@@ -13,7 +13,7 @@ var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
 var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
-var SPLIT_COUNT     = 10;  // 分裂する数
+var SPLIT_COUNT     = 7;  // 分裂する数
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -201,11 +201,13 @@ phina.define("MainScene", {
 
     // ボールを3つ作成
     this.balls = [];
-    for (let i = 0; i < BALL_NUMBER; i++) {
-      let ball = Ball().addChildTo(this);
-      ball.setPosition(this.paddle.x, this.paddle.top - ball.radius);  // バドルの上にボールを配置
-      this.balls.push(ball);
-    }
+    // for (let i = 0; i < BALL_NUMBER; i++) {
+    //   let ball = Ball().addChildTo(this);
+    //   ball.setPosition(this.paddle.x, this.paddle.top - ball.radius);  // バドルの上にボールを配置
+    //   this.balls.push(ball);
+    // }
+    // ボールを上方向に斜めにタイミングをずらして発射
+    this.createBallsWithDelay(10, 100);  // ボール20個を100msずつ遅らせて発射
 
     this.paddle.hold(this.balls[0]);
 
@@ -230,6 +232,13 @@ phina.define("MainScene", {
         this.exit('title');
       }
       return;
+    }
+
+    // ゲームが開始されていない間はボールをパドルに追従させる
+    if (!this.gameStarted) {
+      this.balls.forEach(ball => {
+        ball.setPosition(this.paddle.x, this.paddle.top - 20);  // パドルにボールを追従させる
+      });
     }
 
     if (this.gameStarted) {
@@ -282,13 +291,38 @@ phina.define("MainScene", {
       this.gameStarted = true;
       this.paddle.release();
 
-      // ボールごとに速度と初期角度を設定
-      this.balls.forEach(ball => {
-        ball.speed = BALL_SPEED; // ボールのスピードを設定
-        ball.direction = Vector2(1, -Math.random()).normalize();
-      });
+      // ボールを全て発射する（上方向に斜めに飛ばす）
+      const angleRange = Math.PI / 3;  // 上方向の30度範囲で発射（約60度）
+      for (let i = 0; i < this.balls.length; i++) {
+        const ball = this.balls[i];
+        const angle = -Math.PI / 2 + (i / (this.balls.length - 1)) * angleRange - angleRange / 2;  // -90度の範囲で調整
+        ball.direction = Vector2(Math.cos(angle), Math.sin(angle)).normalize();  // 角度に基づいた方向ベクトル
+        ball.speed = BALL_SPEED;  // ボールの速度を設定
+      }
 
       // this.playBGM();
+    }
+  },
+
+  // ボールを作成し、上方向に斜めにタイミングをずらして発射する
+  createBallsWithDelay: function(count, delay) {
+    const angleRange = Math.PI / 3;  // 上方向の30度範囲で発射（約60度）
+    const centerX = this.paddle.x;
+    const centerY = this.paddle.top - 20;  // パドルの上から少し離れた位置
+
+    for (let i = 0; i < count; i++) {
+      // タイミングをずらしてボールを発射
+      setTimeout(() => {
+        let ball = Ball().addChildTo(this);
+        ball.setPosition(centerX, centerY);  // ボールをパドルの上に配置
+
+        // ボールの進行方向を上方向に少しずつ角度をずらして設定
+        const angle = -Math.PI / 2 + (i / (count - 1)) * angleRange - angleRange / 2;  // -90度の範囲で調整
+        ball.direction = Vector2(Math.cos(angle), Math.sin(angle)).normalize();  // 角度に基づいた方向ベクトル
+        ball.speed = BALL_SPEED;  // ボールの速度を設定
+
+        this.balls.push(ball);  // ボールリストに追加
+      }, i * delay);  // i * delay ミリ秒後に発射
     }
   },
 
@@ -495,6 +529,7 @@ phina.define("MainScene", {
 
   gameClear: function() {
     this.clearFlag = true;
+    this.removeAllBalls();
 
     Label({
       text: 'Game Clear!\nScore: ' + this.score,
