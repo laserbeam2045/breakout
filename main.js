@@ -11,7 +11,7 @@ var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 24;
+var MAX_BALL_SPEED  = 27;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
 var SPLIT_COUNT_B   = 3;  // 分裂する数
@@ -489,6 +489,12 @@ phina.define("MainScene", {
         this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
       }
 
+      // 紫色のボールの場合は再度分裂
+      if (ball.isPurple) {
+        ball.isPurple = false;
+        this.splitBall(ball, 10);  // 金色のボールが再度3つに分裂
+      }
+
       // ボールが1つだけの場合に分裂させる
       if (this.balls.length === 1 && Math.random() < 1.0) {
         this.splitBall(ball, SPLIT_COUNT_A);
@@ -553,11 +559,16 @@ phina.define("MainScene", {
     return this.balls.some(ball => ball.isGolden)
   },
 
+  hasPurpleBall: function() {
+    return this.balls.some(ball => ball.isPurple)
+  },
+
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
       const isGolden = !this.hasGoldenBall();  // 最初のボールを金色に設定
-      let newBall = Ball(isGolden).addChildTo(this);
+      const isPurple = !isGolden && !this.hasPurpleBall() && Math.random() < 0.2;
+      let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
       // ランダムな角度で射出
@@ -640,16 +651,17 @@ phina.define('BonusBlock', {
 phina.define('Ball', {
   superClass: 'CircleShape',
 
-  init: function(isGolden) {
+  init: function(isGolden, isPurple = false) {
     this.superInit({
       radius: BALL_RADIUS,
-      fill: isGolden ? 'gold' : 'white',  // 金色のボールかどうかで色を変える
+      fill: isGolden ? 'gold' : isPurple ? 'purple' : 'white',  // 金色のボールかどうかで色を変える
       stroke: null,
     });
 
     this.speed = BALL_SPEED;
     this.direction = Vector2(1, -1).normalize();
     this.isGolden = isGolden || false;  // 金色かどうかのフラグ
+    this.isPurple = isPurple || false;  // 金色かどうかのフラグ
   },
 
   // 内側に影を描画するためのカスタム描画
@@ -658,7 +670,7 @@ phina.define('Ball', {
 
     // グラデーションの作成 (内側から外側に向けて影)
     var gradient = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, this.radius);
-    gradient.addColorStop(0, this.isGolden ? 'gold' : 'white');  // 中心は白
+    gradient.addColorStop(0, this.isGolden ? 'gold' : this.isPurple ? 'purple' : 'white');  // 中心は白
     gradient.addColorStop(1, '#ccc');   // 外側はグレー (影っぽく見せる)
 
     // グラデーションで塗りつぶし
