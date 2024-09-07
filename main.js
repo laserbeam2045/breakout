@@ -7,7 +7,7 @@ var MAX_PER_LINE    = 25;
 var BLOCK_NUM       = MAX_PER_LINE * 25;
 var BLOCK_SIZE      = 21.5;
 var BOARD_PADDING   = 50;
-var PADDLE_WIDTH    = 150;
+var PADDLE_WIDTH    = 200;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
@@ -428,7 +428,7 @@ phina.define("MainScene", {
     this.blockBreakSound.play();
   
     // ボールが1つだけの場合に分裂させる
-    if (this.balls.length === 1 && Math.random() < 0.333) {
+    if (this.balls.length === 1 && Math.random() < 1.0) {
       this.splitBall(ball);
     }
   },
@@ -601,7 +601,7 @@ phina.main(function() {
       //   'background12': 'https://qdojo.jp/wp-content/uploads/2021/06/movie-141-thumbnail.webp',
       // },
       image: {
-        'background01': 'https://asoppa.com/html/user_data/recipe/3907/1111003425_636d9891ede99.png',
+        'background01': 'https://stat.ameba.jp/user_images/20141103/19/avanzer-hg-blog/23/66/j/o0800056513118215108.jpg?caw=800',
         'background02': 'https://asoppa.com/html/user_data/recipe/3833/0516051715_6281de5b2d6b3.png',
         'background03': 'https://noikiiki.info/wp-content/uploads/2021/01/arunashi1-1-1024x724.jpg',
         'background04': 'https://高齢者クイズ.jp/wp-content/uploads/2020/12/%EF%BC%92-1.png',
