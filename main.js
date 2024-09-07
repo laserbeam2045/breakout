@@ -11,7 +11,7 @@ var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 27;
+var MAX_BALL_SPEED  = 32;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
 var SPLIT_COUNT_B   = 3;  // 分裂する数
@@ -567,7 +567,7 @@ phina.define("MainScene", {
   splitBall: function(originalBall, count) {
     for (let i = 0; i < count - 1; i++) {
       const isGolden = !this.hasGoldenBall();  // 最初のボールを金色に設定
-      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.2;
+      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.333;
       let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
