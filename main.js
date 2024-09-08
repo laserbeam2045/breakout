@@ -39,6 +39,7 @@ const assets = {
   },
   sound: {
     'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
+    'paddle_reflect': 'assets/打撃3.mp3',  // サウンドファイルのパス
     // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
     // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
   },
@@ -142,6 +143,7 @@ phina.define("MainScene", {
 
     // サウンドの読み込み
     this.blockBreakSound = AssetManager.get('sound', 'block_break');
+    this.paddleReflectSound = AssetManager.get('sound', 'paddle_reflect');
     // this.ballReturnSound = AssetManager.get('sound', 'ball_return');
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
@@ -467,6 +469,8 @@ phina.define("MainScene", {
   },  
 
   checkPaddleCollision: function(ball) {
+    if (this.isStopped) return;
+
     if (ball.hitTestElement(this.paddle)) {
       // パドルの上に当たった場合
       if (ball.bottom >= this.paddle.top) {
@@ -488,11 +492,10 @@ phina.define("MainScene", {
           // ball.isGolden = false;
           this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
         }
-  
+
         // 紫色のボールの場合は再度分裂
         if (ball.isPurple) {
-          ball.isPurple = false;
-          this.splitBall(ball, 10);
+          this.pauseBallAndShake(ball);
         }
 
         // ボールが1つだけの場合に分裂させる
@@ -501,19 +504,94 @@ phina.define("MainScene", {
         }
       }
       // パドルの側面に当たった場合
-      else if(ball.right <= this.paddle.left || ball.left >= this.paddle.right) {
-        ball.reflectX();  // X方向の反射
-        // ボールの位置を調整（パドルの左右に沿うように配置）
-        if (ball.right <= this.paddle.left) {
-          ball.right = this.paddle.left;
-        } else if (ball.left >= this.paddle.right) {
-          ball.left = this.paddle.right;
+      else if (ball.right >= this.paddle.left && ball.left <= this.paddle.right) {
+        // ボールの側面がパドルの側面に当たった場合
+        if (ball.x < this.paddle.left || ball.x > this.paddle.right) {
+          // X方向の反射のみを行う
+          ball.reflectX();
         }
       }
 
       // サウンドをプレイ
       // this.ballReturnSound.play();
     }
+  },
+
+  pauseBallAndShake: function(ball) {
+    const scene = this;
+    scene.isStopped = true;
+  
+    // ボールの状態を保存する配列
+    const originalStates = [];
+  
+    // すべてのボールの位置、速度、方向を一時的に保存し、ボールを止める
+    if (scene.balls && scene.balls.length > 0) {  // ballsが存在し、要素があることを確認
+      scene.balls.forEach(ball => {
+        originalStates.push({
+          x: ball.x,  // 元のX位置
+          y: ball.y,  // 元のY位置
+          speed: ball.speed,  // 元の速度
+          direction: ball.direction.clone(),  // 元の進行方向
+        });
+  
+        // ボールの移動を完全に停止
+        ball.speed = 0;
+        ball.direction.set(0, 0);  // 移動方向もリセット
+      });
+  
+      // 画面を震動させる
+      scene.children.forEach(element => this.shakeElement(element));
+
+      // 一定時間後にすべてのボールの状態を元に戻す
+      setTimeout(() => {
+        scene.balls.forEach((ball, index) => {
+          // 元の状態を復元
+          const state = originalStates[index];
+          if (!state) return;
+          ball.x = state.x;  // 元の位置に戻す
+          ball.y = state.y;
+          ball.speed = state.speed;  // 元の速度に戻す
+          ball.direction = state.direction;  // 元の方向に戻す
+        });
+        this.splitBall(ball, 10);
+        ball.isPurple = false;
+        this.paddleReflectSound.play();
+        scene.isStopped = false;
+      }, 200);
+    } else {
+      console.error('No balls found or balls array is undefined.');
+    }
+  },
+  
+  // 特定の要素を震動させる関数
+  shakeElement: function(element) {
+    const originalPosition = { x: element.x, y: element.y };  // 元の位置を保存
+    let shakeDuration = 200;  // 震動時間
+    let shakeStrength = 10;   // 震動の強さ
+    let startTime = Date.now();  // 開始時刻
+
+    const shake = () => {
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime < shakeDuration) {
+        // ランダムに要素をシェイク
+        let shakeX = (Math.random() - 0.5) * shakeStrength;
+        let shakeY = (Math.random() - 0.5) * shakeStrength;
+  
+        // 要素の位置をシェイク
+        element.x = originalPosition.x + shakeX;
+        element.y = originalPosition.y + shakeY;
+  
+        // 次のフレームで再度シェイクを呼び出す
+        requestAnimationFrame(shake);
+      } else {
+        // シェイク終了後、位置を元に戻す
+        element.x = originalPosition.x;
+        element.y = originalPosition.y;
+      }
+    };
+  
+    // シェイクを開始
+    shake();
   },
 
   checkBlockCollisions: function(ball) {
@@ -698,7 +776,7 @@ phina.define('Ball', {
   },
 
   move: function() {
-    this.x += this.direction.x * this.speed + 1;  // スピードを反映させる
+    this.x += this.direction.x * this.speed;  // スピードを反映させる
     this.y += this.direction.y * this.speed;  // スピードを反映させる
   },
 
