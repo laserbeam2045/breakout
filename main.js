@@ -974,6 +974,7 @@ phina.define('BossScene', {
     this.superMethod('update', app);
 
     if (app.isStopped) return;
+    if (app.isGameOver) return;
 
     // プレイヤーのHPバーの更新
     this.playerHPLabel.text = `HP: ${this.playerHP}`;
@@ -984,7 +985,7 @@ phina.define('BossScene', {
     if (this.dragon.direction === 'down') {
       if (this.isGameOver) return;
       this.fireballCooldown += app.deltaTime;
-      if (this.fireballCooldown > Math.random() * 2000 + 1000) {
+      if (this.fireballCooldown > Math.random() * 500 + 500) {
         this.fireballCooldown = 0;  // クールダウンをリセット
         this.spawnFireball();  // 火の玉を発射
       }
