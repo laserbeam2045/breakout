@@ -51,7 +51,7 @@ const assets = {
 };
 
 // ステージ数を画像の数に応じて設定
-const stageCount = Object.keys(assets.image).length;
+const stageCount = Object.keys(assets.image).length - 1;
 
 phina.define("TitleScene", {
   superClass: 'DisplayScene',
