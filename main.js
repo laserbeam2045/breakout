@@ -40,6 +40,10 @@ const assets = {
   sound: {
     'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
     'paddle_reflect': 'assets/打撃3.mp3',  // サウンドファイルのパス
+    'clear_sound': 'assets/シャキーン3.mp3',  // サウンドファイルのパス
+    'decision_sound': 'assets/決定ボタンを押す23.mp3',  // サウンドファイルのパス
+    'failed_sound': 'assets/チーン1.mp3',  // サウンドファイルのパス
+    'cursor_sound': 'assets/カーソル移動4.mp3',  // サウンドファイルのパス
     // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
     // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
   },
@@ -82,6 +86,8 @@ phina.define("TitleScene", {
     const hueStart = 0;  // 色相の開始値 (赤)
     const hueStep = 30;  // 各ボタンごとに色相を30度ずつ変化させる
 
+    this.decisionSound = AssetManager.get('sound', 'decision_sound');
+
     for (let i = 0; i < stageCount; i++) {
       const col = i % 3;  // 列
       const row = Math.floor(i / 3);  // 行
@@ -100,6 +106,7 @@ phina.define("TitleScene", {
       .addChildTo(this)
       .setPosition(startX + col * (buttonWidth + buttonSpacingX), startY + row * buttonSpacingY)
       .on('push', () => {
+        this.decisionSound.play();
         this.exit('main', { stage: i + 1 });
       });
     }
@@ -144,6 +151,9 @@ phina.define("MainScene", {
     // サウンドの読み込み
     this.blockBreakSound = AssetManager.get('sound', 'block_break');
     this.paddleReflectSound = AssetManager.get('sound', 'paddle_reflect');
+    this.clearSound = AssetManager.get('sound', 'clear_sound');
+    this.failedSound = AssetManager.get('sound', 'failed_sound');
+    this.cursorSound = AssetManager.get('sound', 'cursor_sound');
     // this.ballReturnSound = AssetManager.get('sound', 'ball_return');
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
@@ -498,6 +508,7 @@ phina.define("MainScene", {
           // 金色のボールの場合は再度分裂
           if (ball.isGolden) {
             // ball.isGolden = false;
+            this.cursorSound.play();
             this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
           }
 
@@ -564,7 +575,7 @@ phina.define("MainScene", {
         ball.isPurple = false;
         scene.isStopped = false;
         this.paddleReflectSound.play();
-      }, 200);
+      }, 150);
     } else {
       console.error('No balls found or balls array is undefined.');
     }
@@ -573,7 +584,7 @@ phina.define("MainScene", {
   // 特定の要素を震動させる関数
   shakeElement: function(element) {
     const originalPosition = { x: element.x, y: element.y };  // 元の位置を保存
-    let shakeDuration = 200;  // 震動時間
+    let shakeDuration = 150;  // 震動時間
     let shakeStrength = 10;   // 震動の強さ
     let startTime = Date.now();  // 開始時刻
 
@@ -682,6 +693,7 @@ phina.define("MainScene", {
   gameClear: function() {
     this.clearFlag = true;
     this.removeAllBalls();
+    this.clearSound.play();
 
     this.score += Math.floor(this.remainingTime * 100);
 
@@ -700,7 +712,7 @@ phina.define("MainScene", {
 
   gameOver: function() {
     this.isGameOver = true;
-    // this.bgm.pause();  // BGMを停止
+    this.failedSound.play();
 
     this.score += Math.floor(this.remainingTime * 100);
 
