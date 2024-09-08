@@ -431,7 +431,7 @@ phina.define('BaseGameScene', {
             // setTimeout(() => {
               ball.isPurple = false;
               console.log(123)
-              this.splitBall(ball, 10);
+              this.splitBall(ball, 16);
             // }, SHAKE_TIME);
           }
 
@@ -453,7 +453,7 @@ phina.define('BaseGameScene', {
     }
   },
 
-  pauseAllAndShake: function() {
+  pauseAllAndShake: function(shakeTime = SHAKE_TIME) {
     const scene = this;
     scene.isStopped = true;
   
@@ -509,7 +509,7 @@ phina.define('BaseGameScene', {
     });
 
     // 画面を震動させる
-    scene.children.forEach(element => this.shakeElement(element));
+    scene.children.forEach(element => this.shakeElement(element, shakeTime));
 
     // 一定時間後にすべてのボールの状態を元に戻す
     setTimeout(() => {
@@ -535,13 +535,13 @@ phina.define('BaseGameScene', {
       // if (ball) ball.isPurple = false;
       scene.isStopped = false;
       this.paddleReflectSound.play();
-    }, SHAKE_TIME);
+    }, shakeTime);
   },
   
   // 特定の要素を震動させる関数
-  shakeElement: function(element) {
+  shakeElement: function(element, shakeTime) {
     const originalPosition = { x: element.x, y: element.y };  // 元の位置を保存
-    let shakeDuration = SHAKE_TIME;  // 震動時間
+    let shakeDuration = shakeTime;  // 震動時間
     let shakeStrength = 10;   // 震動の強さ
     let startTime = Date.now();  // 開始時刻
 
@@ -1092,12 +1092,13 @@ phina.define('BossScene', {
 
     // ドラゴンのHPが0になったらゲームクリア
     if (this.dragonHP <= 0) {
-      this.pauseAllAndShake();
+      this.pauseAllAndShake(1500);
       setTimeout(() => {
         this.dragon.remove();
         this.hpGauge.remove();
         this.gameClear();
-      }, SHAKE_TIME);
+        this.fireballs.forEach((fire) => fire.remove());
+      }, 1500);
     }
     // プレイヤーのHPが0になったらゲームオーバー
     if (this.playerHP <= 0) {
