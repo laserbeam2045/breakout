@@ -219,6 +219,7 @@ phina.define('BaseGameScene', {
     this.failedSound = AssetManager.get('sound', 'failed_sound');
     this.cursorSound = AssetManager.get('sound', 'cursor_sound');
     this.attackSound = AssetManager.get('sound', 'attack_sound');
+    this.attackSound.volume = 0.25;
   },
 
   update: function(app) {
@@ -801,6 +802,8 @@ phina.define('BossScene', {
   init: function(options) {
     this.superInit(options);
     this.setupGame();
+    this.soundCooldown = false;  // サウンド再生クールダウンフラグ
+    this.soundCooldownDuration = 100;  // サウンドが鳴った後に再度鳴るまでの待機時間（ミリ秒）
   },
 
   setupGame: function() {
@@ -990,7 +993,13 @@ phina.define('BossScene', {
       // ボールがドラゴンに当たった際の反射処理
       ball.reflectY();
 
-      this.attackSound.play();
+      if (!this.soundCooldown) {
+        this.soundCooldown = true;
+        setTimeout(() => {
+          this.soundCooldown = false;  // 一定時間後に再びサウンドを再生可能にする
+        }, this.soundCooldownDuration);
+        this.attackSound.play();
+      }
 
       // ドラゴンのHPを減少
       this.dragonHP -= 10;
