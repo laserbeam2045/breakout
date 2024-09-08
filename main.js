@@ -2,7 +2,7 @@ phina.globalize();
 
 // 変数の定義
 var SCREEN_WIDTH    = 640;
-var SCREEN_HEIGHT   = 960;
+var SCREEN_HEIGHT   = 1024;
 var MAX_PER_LINE    = 20;
 var BLOCK_NUM       = MAX_PER_LINE * 20;
 var BLOCK_SIZE      = 26.75;
@@ -10,8 +10,8 @@ var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 14;
-var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 32;
+var BALL_SPEED      = 12;  // ボールのスピードを少し上げる
+var MAX_BALL_SPEED  = 24;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
 var SPLIT_COUNT_B   = 3;  // 分裂する数
@@ -468,40 +468,51 @@ phina.define("MainScene", {
 
   checkPaddleCollision: function(ball) {
     if (ball.hitTestElement(this.paddle)) {
-      // ボールの下側をパドルの上に移動させる
-      ball.bottom = this.paddle.top;
+      // パドルの上に当たった場合
+      if (ball.bottom >= this.paddle.top) {
+        // ボールの下側をパドルの上に移動させる
+        ball.bottom = this.paddle.top;
 
-      // ball.radius += 0.1;
+        // X方向の反射（左右反転）
+        ball.reflectY();  // Y方向の反射
+
+        // パドルの速度に基づいてスピンを加える
+        const spinFactor = 0.1;  // スピンの強さを調整する係数
+        ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
+
+        // ボールの速度を保つために正規化
+        ball.direction.normalize();
+
+        // 金色のボールの場合は再度分裂
+        if (ball.isGolden) {
+          // ball.isGolden = false;
+          this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
+        }
   
-      // X方向の反射（左右反転）
-      ball.reflectY();  // Y方向の反射
+        // 紫色のボールの場合は再度分裂
+        if (ball.isPurple) {
+          ball.isPurple = false;
+          this.splitBall(ball, 10);
+        }
 
-      // パドルの速度に基づいてスピンを加える
-      const spinFactor = 0.1;  // スピンの強さを調整する係数
-      ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
-
-      // ボールの速度を保つために正規化
-      ball.direction.normalize();
+        // ボールが1つだけの場合に分裂させる
+        if (this.balls.length === 1 && Math.random() < 1.0) {
+          this.splitBall(ball, SPLIT_COUNT_A);
+        }
+      }
+      // パドルの側面に当たった場合
+      else if(ball.right <= this.paddle.left || ball.left >= this.paddle.right) {
+        ball.reflectX();  // X方向の反射
+        // ボールの位置を調整（パドルの左右に沿うように配置）
+        if (ball.right <= this.paddle.left) {
+          ball.right = this.paddle.left;
+        } else if (ball.left >= this.paddle.right) {
+          ball.left = this.paddle.right;
+        }
+      }
 
       // サウンドをプレイ
       // this.ballReturnSound.play();
-
-      // 金色のボールの場合は再度分裂
-      if (ball.isGolden) {
-        // ball.isGolden = false;
-        this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
-      }
-
-      // 紫色のボールの場合は再度分裂
-      if (ball.isPurple) {
-        ball.isPurple = false;
-        this.splitBall(ball, 10);  // 金色のボールが再度3つに分裂
-      }
-
-      // ボールが1つだけの場合に分裂させる
-      if (this.balls.length === 1 && Math.random() < 1.0) {
-        this.splitBall(ball, SPLIT_COUNT_A);
-      }
     }
   },
 
@@ -517,7 +528,7 @@ phina.define("MainScene", {
   handleBlockCollision: function(block, ball) {
     var dq = Vector2.sub(ball, block);
   
-    if (!ball.isGolden) {
+    // if (!ball.isGolden) {
       if (Math.abs(dq.x) < Math.abs(dq.y)) {
         ball.reflectY();
         if (dq.y >= 0) {
@@ -533,7 +544,7 @@ phina.define("MainScene", {
           ball.right = block.left;
         }
       }
-    }
+    // }
   
     block.remove();
 
@@ -570,9 +581,10 @@ phina.define("MainScene", {
 
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
+    const goldenBallIndex = Math.floor(Math.random() * count)
     for (let i = 0; i < count - 1; i++) {
-      const isGolden = !this.hasGoldenBall();  // 最初のボールを金色に設定
-      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.333;
+      const isGolden = i === goldenBallIndex && !this.hasGoldenBall();  // 最初のボールを金色に設定
+      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.5;
       let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
@@ -686,7 +698,7 @@ phina.define('Ball', {
   },
 
   move: function() {
-    this.x += this.direction.x * this.speed;  // スピードを反映させる
+    this.x += this.direction.x * this.speed + 1;  // スピードを反映させる
     this.y += this.direction.y * this.speed;  // スピードを反映させる
   },
 
