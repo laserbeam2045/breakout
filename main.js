@@ -917,7 +917,7 @@ phina.define('BossScene', {
       .setPosition(this.gridX.center(), this.gridY.span(5));  // ドラゴンの位置調整
 
     // ドラゴンのHP
-    this.dragonHP = 10000;  // 初期HP
+    this.dragonHP = 20000;  // 初期HP
     this.maxDragonHP = this.dragonHP;  // 最大HP
 
     // HPバーの背景（薄い灰色）
