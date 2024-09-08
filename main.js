@@ -662,7 +662,7 @@ phina.define("MainScene", {
     const goldenBallIndex = Math.floor(Math.random() * (count - 1))
     for (let i = 0; i < count - 1; i++) {
       const isGolden = i === goldenBallIndex && !this.hasGoldenBall();
-      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.5;
+      const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 1;
       let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
 
@@ -761,7 +761,7 @@ phina.define('Ball', {
   },
 
   update: function() {
-    if (this.paddle && this.bottom > this.paddle.top) {
+    if (this.paddle && this.bottom > this.paddle.bottom) {
       ball.isFallen = true;
       ball.isGolden = false;
       ball.isPurple = false;
