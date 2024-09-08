@@ -430,7 +430,6 @@ phina.define('BaseGameScene', {
             // this.pauseAllAndShake(ball);
             // setTimeout(() => {
               ball.isPurple = false;
-              console.log(123)
               this.splitBall(ball, 16);
             // }, SHAKE_TIME);
           }
@@ -1092,6 +1091,7 @@ phina.define('BossScene', {
 
     // ドラゴンのHPが0になったらゲームクリア
     if (this.dragonHP <= 0) {
+      this.clearFlag = true;
       this.pauseAllAndShake(1500);
       setTimeout(() => {
         this.dragon.remove();
