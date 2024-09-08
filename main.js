@@ -36,13 +36,14 @@ const assets = {
     'background05': 'https://cdn.mainichi.jp/vol1/2023/05/23/20230523mpj00m040014000p/9.jpg?1',
     // アインシュタイン
     'background06': 'https://i.ytimg.com/vi/YX72DdfSdMU/maxresdefault.jpg',
+    'background': 'https://preview.redd.it/29zh4v56mo951.jpg?width=640&crop=smart&auto=webp&s=0f3122b8c447cd88c90e825f31f7737c06538693',
   },
   sound: {
     'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
     'paddle_reflect': 'assets/打撃3.mp3',  // サウンドファイルのパス
     'clear_sound': 'assets/シャキーン3.mp3',  // サウンドファイルのパス
     'decision_sound': 'assets/決定ボタンを押す23.mp3',  // サウンドファイルのパス
-    'failed_sound': 'assets/チーン1.mp3',  // サウンドファイルのパス
+    'failed_sound': 'assets/データ表示1.mp3',  // サウンドファイルのパス
     'cursor_sound': 'assets/カーソル移動4.mp3',  // サウンドファイルのパス
     // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
     // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
@@ -57,6 +58,8 @@ phina.define("TitleScene", {
 
   init: function(options) {
     this.superInit(options);
+
+    this.backgroundImage = Sprite('background').addChildTo(this).setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // タイトル表示
     Label({
@@ -196,6 +199,8 @@ phina.define("MainScene", {
     } else if (options.stage === 12) {
       backgroundImage = 'background12';
     }
+
+    this.backgroundImage = Sprite('background').addChildTo(this).setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // 背景画像の上半分を表示
     this.backgroundSprite = Sprite(backgroundImage).addChildTo(this)
