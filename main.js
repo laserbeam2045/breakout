@@ -1363,7 +1363,6 @@ phina.define('BossScene', {
             // this.dragonSound.play();
           }, 1500);
         }
-        this.hpLabel1.text = `Red: ${this.dragon1HP}`;
       } else if (dragonName === 'dragon2') {
         this.dragon2HP -= 10;
         if (this.dragon2HP <= 0) {
@@ -1374,7 +1373,6 @@ phina.define('BossScene', {
             this.removeDragon('dragon2');
           }, 1500);
         }
-        this.hpLabel2.text = `Blue: ${this.dragon2HP}`;
       }
 
       // ボールのクールダウンタイマーを開始
