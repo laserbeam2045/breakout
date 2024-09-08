@@ -430,7 +430,8 @@ phina.define('BaseGameScene', {
             // this.pauseAllAndShake(ball);
             // setTimeout(() => {
               ball.isPurple = false;
-              this.splitBall(ball, SPLIT_COUNT_B);
+              console.log(123)
+              this.splitBall(ball, 10);
             // }, SHAKE_TIME);
           }
 
@@ -1091,9 +1092,12 @@ phina.define('BossScene', {
 
     // ドラゴンのHPが0になったらゲームクリア
     if (this.dragonHP <= 0) {
-      this.dragon.remove();
-      this.hpGauge.remove();
-      this.gameClear();
+      this.pauseAllAndShake();
+      setTimeout(() => {
+        this.dragon.remove();
+        this.hpGauge.remove();
+        this.gameClear();
+      }, SHAKE_TIME);
     }
     // プレイヤーのHPが0になったらゲームオーバー
     if (this.playerHP <= 0) {
