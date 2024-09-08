@@ -312,6 +312,14 @@ phina.define('BaseGameScene', {
         let ball = Ball(isGolden).addChildTo(this);
         ball.setPosition(centerX, centerY);  // ボールをパドルの上に配置
 
+        // // 一定確率（20%）で虹色のボールにする
+        // // TODO: 移動する
+        // if (Math.random() < 0.75) {
+        //   ball.isRainbow = true;
+        // } else {
+        //   ball.isRainbow = false;
+        // }
+
         // ボールの進行方向を上方向に少しずつ角度をずらして設定
         const angle = -Math.PI / 2 + (i / (count - 1)) * angleRange - angleRange / 2;  // -90度の範囲で調整
         ball.direction = Vector2(Math.cos(angle), Math.sin(angle)).normalize();  // 角度に基づいた方向ベクトル
@@ -434,6 +442,25 @@ phina.define('BaseGameScene', {
     }
   },
 
+  activateInvincibility: function() {
+    this.isInvincible = true;
+  
+    // パドルを虹色にきらめかせる
+    this.paddle.tweener.clear()
+      // .to({ fill: 'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)' }, 300)
+      .to({ fill: 'rgba(0,0,0,0.5)' }, 300)
+      .setLoop(true)
+      .to({ alpha: 0.7 }, 500)
+      .to({ alpha: 1.0 }, 500);
+  
+    // 3秒後に無敵を解除
+    setTimeout(() => {
+      this.isInvincible = false;
+      this.paddle.tweener.clear();
+      this.paddle.fill = 'white';  // パドルの色を元に戻す
+    }, 10000);
+  },
+
   checkPaddleCollision: function(ball) {
     if (this.isStopped) return;
 
@@ -445,6 +472,11 @@ phina.define('BaseGameScene', {
           ball.bottom = this.paddle.top;
           // X方向の反射（左右反転）
           ball.reflectY();  // Y方向の反射
+
+          // 虹色のボールなら無敵状態にする
+          if (ball.isRainbow) {
+            this.activateInvincibility();
+          }
 
           // パドルの速度に基づいてスピンを加える
           const spinFactor = 0.1;  // スピンの強さを調整する係数
@@ -1028,7 +1060,7 @@ phina.define('BossScene', {
   updateFireballs: function(app) {
     this.fireballs.forEach((fireball, index) => {
       fireball.move();
-      if (fireball.hitTestElement(this.paddle)) {
+      if (fireball.hitTestElement(this.paddle) && !this.isInvincible) {
         if (!(fireball.bottom > this.paddle.top + 50)) return;
         this.pauseAllAndShake();
         this.playerHP -= 10;
@@ -1044,10 +1076,10 @@ phina.define('BossScene', {
       this.balls.forEach(ball => ball.setPosition(this.paddle.x, this.paddle.top - 20));
       if (app.keyboard.getKeyDown('space')) this.startGame();
     } else {
-      this.balls.forEach(ball => {
-        ball.move();
-        this.checkCollisions(ball);
-      });
+      // this.balls.forEach(ball => {
+      //   ball.move();
+      //   this.checkCollisions(ball);
+      // });
       this.updatePaddle(app);
     }
   },
@@ -1375,7 +1407,7 @@ phina.define('BossScene', {
     ball.isOnCooldown = true;  // クールダウンを有効にする
     setTimeout(() => {
       ball.isOnCooldown = false;  // 10ms後にクールダウンを解除
-    }, 700);
+    }, 100);
   },
 
   // ドラゴンを完全に削除する関数
@@ -1476,10 +1508,10 @@ phina.define('BonusBlock', {
 phina.define('Ball', {
   superClass: 'CircleShape',
 
-  init: function(isGolden, isPurple = false) {
+  init: function(isGolden, isPurple = false, isRainbow = false) {
     this.superInit({
       radius: BALL_RADIUS,
-      fill: isGolden ? 'gold' : isPurple ? 'purple' : 'white',  // 金色のボールかどうかで色を変える
+      fill: isGolden ? 'gold' : isPurple ? 'purple' : isRainbow ? 'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)' : 'white',  // 金色のボールかどうかで色を変える
       stroke: null,
     });
 
@@ -1511,11 +1543,11 @@ phina.define('Ball', {
 
     // グラデーションの作成 (内側から外側に向けて影)
     var gradient = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, this.radius);
-    gradient.addColorStop(0, this.isGolden ? 'gold' : this.isPurple ? 'purple' : 'white');  // 中心は白
+    gradient.addColorStop(0, this.isGolden ? 'gold' : this.isPurple ? 'purple' : this.isRainbow ? 'rgba(0, 0, 0, 0.5)' : 'white');  // 中心は白
     gradient.addColorStop(1, '#ccc');   // 外側はグレー (影っぽく見せる)
-
     // グラデーションで塗りつぶし
     ctx.fillStyle = gradient;
+    // ctx.fill = 'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)';
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2, false);
     ctx.fill();
