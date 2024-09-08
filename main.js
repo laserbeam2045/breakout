@@ -473,47 +473,47 @@ phina.define("MainScene", {
 
     if (ball.hitTestElement(this.paddle)) {
       // パドルの上に当たった場合
-      if (ball.bottom >= this.paddle.top) {
-        // ボールの下側をパドルの上に移動させる
-        ball.bottom = this.paddle.top;
+      if (ball.x >= this.paddle.left && ball.x <= this.paddle.right) {
+        if (ball.bottom >= this.paddle.top) {
+          // ボールの下側をパドルの上に移動させる
+          console.log(ball.bottom, this.paddle.top)
+          ball.bottom = this.paddle.top;
+          // X方向の反射（左右反転）
+          ball.reflectY();  // Y方向の反射
 
-        // X方向の反射（左右反転）
-        ball.reflectY();  // Y方向の反射
+          // パドルの速度に基づいてスピンを加える
+          const spinFactor = 0.1;  // スピンの強さを調整する係数
+          ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
 
-        // パドルの速度に基づいてスピンを加える
-        const spinFactor = 0.1;  // スピンの強さを調整する係数
-        ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
+          // ボールの速度を保つために正規化
+          ball.direction.normalize();
 
-        // ボールの速度を保つために正規化
-        ball.direction.normalize();
+          // 金色のボールの場合は再度分裂
+          if (ball.isGolden) {
+            // ball.isGolden = false;
+            this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
+          }
 
-        // 金色のボールの場合は再度分裂
-        if (ball.isGolden) {
-          // ball.isGolden = false;
-          this.splitBall(ball, SPLIT_COUNT_A);  // 金色のボールが再度3つに分裂
-        }
+          // 紫色のボールの場合は再度分裂
+          if (ball.isPurple) {
+            this.pauseBallAndShake(ball);
+          }
 
-        // 紫色のボールの場合は再度分裂
-        if (ball.isPurple) {
-          this.pauseBallAndShake(ball);
-        }
-
-        // ボールが1つだけの場合に分裂させる
-        if (this.balls.length === 1 && Math.random() < 1.0) {
-          this.splitBall(ball, SPLIT_COUNT_A);
-        }
-      }
-      // パドルの側面に当たった場合
-      else if (ball.right >= this.paddle.left && ball.left <= this.paddle.right) {
-        // ボールの側面がパドルの側面に当たった場合
-        if (ball.x < this.paddle.left || ball.x > this.paddle.right) {
-          // X方向の反射のみを行う
-          ball.reflectX();
+          // ボールが1つだけの場合に分裂させる
+          if (this.balls.length === 1 && Math.random() < 1.0) {
+            this.splitBall(ball, SPLIT_COUNT_A);
+          }
         }
       }
-
-      // サウンドをプレイ
-      // this.ballReturnSound.play();
+      // ボールの側面がパドルの側面に当たった場合
+      else if (!ball.isFallen) {
+        console.log(ball)
+        // X方向の反射のみを行う
+        // ball.reflectX();
+        ball.isFallen = true;
+        ball.isGolden = false;
+        ball.isPurple = false;
+      }
     }
   },
 
@@ -555,8 +555,8 @@ phina.define("MainScene", {
         });
         this.splitBall(ball, 10);
         ball.isPurple = false;
-        this.paddleReflectSound.play();
         scene.isStopped = false;
+        this.paddleReflectSound.play();
       }, 200);
     } else {
       console.error('No balls found or balls array is undefined.');
@@ -659,9 +659,9 @@ phina.define("MainScene", {
 
   // ボールを指定した数に分裂させる関数
   splitBall: function(originalBall, count) {
-    const goldenBallIndex = Math.floor(Math.random() * count)
+    const goldenBallIndex = Math.floor(Math.random() * (count - 1))
     for (let i = 0; i < count - 1; i++) {
-      const isGolden = i === goldenBallIndex && !this.hasGoldenBall();  // 最初のボールを金色に設定
+      const isGolden = i === goldenBallIndex && !this.hasGoldenBall();
       const isPurple = !isGolden && count === SPLIT_COUNT_A && !this.hasPurpleBall() && Math.random() < 0.5;
       let newBall = Ball(isGolden, isPurple).addChildTo(this);
       newBall.setPosition(originalBall.x, originalBall.y);
@@ -754,9 +754,18 @@ phina.define('Ball', {
     });
 
     this.speed = BALL_SPEED;
+    this.isFallen = false;
     this.direction = Vector2(1, -1).normalize();
     this.isGolden = isGolden || false;  // 金色かどうかのフラグ
     this.isPurple = isPurple || false;  // 金色かどうかのフラグ
+  },
+
+  update: function() {
+    if (this.paddle && this.bottom > this.paddle.top) {
+      ball.isFallen = true;
+      ball.isGolden = false;
+      ball.isPurple = false;
+    }
   },
 
   // 内側に影を描画するためのカスタム描画
