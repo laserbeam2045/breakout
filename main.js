@@ -304,6 +304,14 @@ phina.define("MainScene", {
       this.paddle.prevX = this.paddle.x;  // 現在位置を次フレームに備えて保持
     }
 
+    // 色付きボールを最後に表示するために再配置
+    this.balls.forEach(ball => {
+      if (ball.isGolden || ball.isPurple) {
+        ball.remove();  // 一度削除して
+        ball.addChildTo(this);  // 最後に再追加
+      }
+    });
+
     if (this.isPC) {
       this.movePaddleWithKeyboard(app.keyboard);
     } else {
@@ -476,7 +484,6 @@ phina.define("MainScene", {
       if (ball.x >= this.paddle.left && ball.x <= this.paddle.right) {
         if (ball.bottom >= this.paddle.top) {
           // ボールの下側をパドルの上に移動させる
-          console.log(ball.bottom, this.paddle.top)
           ball.bottom = this.paddle.top;
           // X方向の反射（左右反転）
           ball.reflectY();  // Y方向の反射
@@ -505,15 +512,15 @@ phina.define("MainScene", {
           }
         }
       }
-      // ボールの側面がパドルの側面に当たった場合
-      else if (!ball.isFallen) {
-        console.log(ball)
-        // X方向の反射のみを行う
-        // ball.reflectX();
-        ball.isFallen = true;
-        ball.isGolden = false;
-        ball.isPurple = false;
-      }
+      // // ボールの側面がパドルの側面に当たった場合
+      // else if (!ball.isFallen) {
+      //   console.log(ball)
+      //   // X方向の反射のみを行う
+      //   // ball.reflectX();
+      //   ball.isFallen = true;
+      //   ball.isGolden = false;
+      //   ball.isPurple = false;
+      // }
     }
   },
 
@@ -758,15 +765,22 @@ phina.define('Ball', {
     this.direction = Vector2(1, -1).normalize();
     this.isGolden = isGolden || false;  // 金色かどうかのフラグ
     this.isPurple = isPurple || false;  // 金色かどうかのフラグ
-  },
 
-  update: function() {
-    if (this.paddle && this.bottom > this.paddle.bottom) {
-      ball.isFallen = true;
-      ball.isGolden = false;
-      ball.isPurple = false;
+    // 色付きのボールは常に最前面に表示されるように zIndex を設定
+    if (this.isGolden || this.isPurple) {
+      this.zIndex = 100;  // 高い値に設定
+    } else {
+      this.zIndex = 1;  // 通常のボール
     }
   },
+
+  // update: function() {
+  //   if (this.paddle && this.bottom > this.paddle.bottom) {
+  //     ball.isFallen = true;
+  //     ball.isGolden = false;
+  //     ball.isPurple = false;
+  //   }
+  // },
 
   // 内側に影を描画するためのカスタム描画
   draw: function(canvas) {
