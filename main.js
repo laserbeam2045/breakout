@@ -28,13 +28,13 @@ const assets = {
     // エジソン
     'background01': 'https://amanaimages.com/pickup/img/historicalfigures/bnr_kagaku_GRA6070701900M.jpg',
     // モーツァルト
-    'background02': 'https://cdn-blob.austria.info/cms-uploads-prod/default/0002/92/thumb_191548_default_header_big.jpeg',
+    // 'background02': 'https://cdn-blob.austria.info/cms-uploads-prod/default/0002/92/thumb_191548_default_header_big.jpeg',
     // 大谷翔平
-    'background03': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
+    // 'background03': 'https://p.potaufeu.asahi.com/d473-p/picture/27390318/13b16927a46a8b6f7380262da5ec9957_640px.jpg',
     // ピカソ
-    'background04': 'https://cdn.shopify.com/s/files/1/0554/9057/6433/files/e8131b5f33b316a85a80c11dd0872991_480x480.jpg?v=1713847065',
+    // 'background04': 'https://cdn.shopify.com/s/files/1/0554/9057/6433/files/e8131b5f33b316a85a80c11dd0872991_480x480.jpg?v=1713847065',
     // 藤井聡太
-    'background05': 'https://cdn.mainichi.jp/vol1/2023/05/23/20230523mpj00m040014000p/9.jpg?1',
+    // 'background05': 'https://cdn.mainichi.jp/vol1/2023/05/23/20230523mpj00m040014000p/9.jpg?1',
     // アインシュタイン
     'background06': 'https://i.ytimg.com/vi/YX72DdfSdMU/maxresdefault.jpg',
     // 宇宙
@@ -137,7 +137,7 @@ const assets = {
 };
 
 // ステージ数を画像の数に応じて設定
-const stageCount = Object.keys(assets.image).length - 3;
+const stageCount = Object.keys(assets.image).length - 4;
 
 phina.define('AllScene', {
   superClass: 'DisplayScene',
@@ -212,12 +212,12 @@ phina.define("TitleScene", {
 
       // ステージ7を選択した場合にStage7Sceneに遷移
       Button({
-        text: 'ドラゴン',
+        text: 'ステージ3',
         width: 200,
         height: 80,
       })
       .addChildTo(this)
-      .setPosition(startX + 1 * (buttonWidth + buttonSpacingX), startY + 2 * buttonSpacingY)
+      .setPosition(startX + 2 * (buttonWidth + buttonSpacingX), startY + 0 * buttonSpacingY)
       .on('push', () => {
         this.decisionSound.play();
         this.exit('BossScene');  // Stage7Sceneへ遷移
@@ -730,7 +730,7 @@ phina.define("MainScene", {
     if (options.stage === 1) {
       backgroundImage = 'background01';
     } else if (options.stage === 2) {
-      backgroundImage = 'background02';
+      backgroundImage = 'background06';
     } else if (options.stage === 3) {
       backgroundImage = 'background03';
     } else if (options.stage === 4) {
