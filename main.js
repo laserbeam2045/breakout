@@ -11,10 +11,11 @@ var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
 var BALL_RADIUS     = 16;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 32;
+var MAX_BALL_SPEED  = 48;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
 var SPLIT_COUNT_B   = 3;  // 分裂する数
+var TIME_LIMIT      = 40; // 制限時間
 
 var BOARD_SIZE      = SCREEN_WIDTH - BOARD_PADDING * 2;
 var BOARD_OFFSET_X  = BOARD_PADDING + BLOCK_SIZE / 2;
@@ -145,7 +146,7 @@ phina.define("MainScene", {
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
 
     // 制限時間（秒単位で設定）
-    this.timeLimit = 30;
+    this.timeLimit = TIME_LIMIT;
     this.remainingTime = this.timeLimit;  // 残り時間を初期化
 
     // 制限時間表示用のラベルを左上に追加
@@ -696,7 +697,7 @@ phina.define('Ball', {
   },
 
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.1, MAX_BALL_SPEED);  // 最大スピードを設定
+    this.speed = Math.min(this.speed + 0.5, MAX_BALL_SPEED);  // 最大スピードを設定
   },
 });
 
