@@ -4,14 +4,14 @@ phina.globalize();
 var SCREEN_WIDTH    = 640;
 var SCREEN_HEIGHT   = 960;
 var MAX_PER_LINE    = 20;
-var BLOCK_NUM       = MAX_PER_LINE * 15;
+var BLOCK_NUM       = MAX_PER_LINE * 20;
 var BLOCK_SIZE      = 26.75;
 var BOARD_PADDING   = 50;
 var PADDLE_WIDTH    = 150;
 var PADDLE_HEIGHT   = 32;
-var BALL_RADIUS     = 16;
+var BALL_RADIUS     = 14;
 var BALL_SPEED      = 16;  // ボールのスピードを少し上げる
-var MAX_BALL_SPEED  = 48;
+var MAX_BALL_SPEED  = 32;
 var BALL_NUMBER     = 5;  // ボールの数
 var SPLIT_COUNT_A   = 3;  // 分裂する数
 var SPLIT_COUNT_B   = 3;  // 分裂する数
@@ -470,6 +470,8 @@ phina.define("MainScene", {
     if (ball.hitTestElement(this.paddle)) {
       // ボールの下側をパドルの上に移動させる
       ball.bottom = this.paddle.top;
+
+      // ball.radius += 0.1;
   
       // X方向の反射（左右反転）
       ball.reflectY();  // Y方向の反射
@@ -515,19 +517,21 @@ phina.define("MainScene", {
   handleBlockCollision: function(block, ball) {
     var dq = Vector2.sub(ball, block);
   
-    if (Math.abs(dq.x) < Math.abs(dq.y)) {
-      ball.reflectY();
-      if (dq.y >= 0) {
-        ball.top = block.bottom;
+    if (!ball.isGolden) {
+      if (Math.abs(dq.x) < Math.abs(dq.y)) {
+        ball.reflectY();
+        if (dq.y >= 0) {
+          ball.top = block.bottom;
+        } else {
+          ball.bottom = block.top;
+        }
       } else {
-        ball.bottom = block.top;
-      }
-    } else {
-      ball.reflectX();
-      if (dq.x >= 0) {
-        ball.left = block.right;
-      } else {
-        ball.right = block.left;
+        ball.reflectX();
+        if (dq.x >= 0) {
+          ball.left = block.right;
+        } else {
+          ball.right = block.left;
+        }
       }
     }
   
@@ -697,7 +701,8 @@ phina.define('Ball', {
   },
 
   speedUp: function() {
-    this.speed = Math.min(this.speed + 0.5, MAX_BALL_SPEED);  // 最大スピードを設定
+    const newSpeed = Math.min(this.speed + 0.5, MAX_BALL_SPEED);  // 最大スピードを設定
+    this.speed = newSpeed;
   },
 });
 
