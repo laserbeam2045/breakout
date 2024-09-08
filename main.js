@@ -53,13 +53,24 @@ const assets = {
 // ステージ数を画像の数に応じて設定
 const stageCount = Object.keys(assets.image).length - 1;
 
-phina.define("TitleScene", {
+phina.define('AllScene', {
   superClass: 'DisplayScene',
 
   init: function(options) {
     this.superInit(options);
 
-    this.backgroundImage = Sprite('background').addChildTo(this).setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+    this.backgroundImage = Sprite('background')
+    .addChildTo(this)
+    .setSize(SCREEN_WIDTH + 200, SCREEN_HEIGHT + 200)
+    .setPosition(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 100);
+  },
+});
+
+phina.define("TitleScene", {
+  superClass: 'AllScene',
+
+  init: function(options) {
+    this.superInit(options);
 
     // タイトル表示
     Label({
@@ -140,7 +151,7 @@ phina.define("TitleScene", {
 // });
 
 phina.define("MainScene", {
-  superClass: 'DisplayScene',
+  superClass: 'AllScene',
 
   init: function(options) {
     this.superInit(options);
@@ -159,18 +170,6 @@ phina.define("MainScene", {
     this.cursorSound = AssetManager.get('sound', 'cursor_sound');
     // this.ballReturnSound = AssetManager.get('sound', 'ball_return');
     // this.BGM = AssetManager.get('sound', 'heaven_and_hell');
-
-    // 制限時間（秒単位で設定）
-    this.timeLimit = TIME_LIMIT;
-    this.remainingTime = this.timeLimit;  // 残り時間を初期化
-
-    // 制限時間表示用のラベルを左上に追加
-    this.timeLabel = Label({
-      text: 'Time: ' + this.remainingTime,
-      fontSize: 30,
-      fill: 'white',
-      align: 'left',  // 左寄せ
-    }).addChildTo(this).setPosition(20, 30);  // 画面左上に配置
 
     // ステージに応じた背景画像のみを設定
     let backgroundImage;
@@ -200,12 +199,24 @@ phina.define("MainScene", {
       backgroundImage = 'background12';
     }
 
-    this.backgroundImage = Sprite('background').addChildTo(this).setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+    // this.backgroundImage = Sprite('background').addChildTo(this).setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2).setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // 背景画像の上半分を表示
     this.backgroundSprite = Sprite(backgroundImage).addChildTo(this)
       .setPosition(this.gridX.center(), this.gridY.center(-3) - 70) // 画面上部に配置
       .setSize(SCREEN_WIDTH - 100, SCREEN_HEIGHT / 2 - 150); // 高さを画面の半分に設定
+
+    // 制限時間（秒単位で設定）
+    this.timeLimit = TIME_LIMIT;
+    this.remainingTime = this.timeLimit;  // 残り時間を初期化
+
+    // 制限時間表示用のラベルを左上に追加
+    this.timeLabel = Label({
+      text: 'Time: ' + this.remainingTime,
+      fontSize: 30,
+      fill: 'white',
+      align: 'left',  // 左寄せ
+    }).addChildTo(this).setPosition(20, 30);  // 画面左上に配置
 
     // ゲームの設定やスコア表示
     this.setupGame();
