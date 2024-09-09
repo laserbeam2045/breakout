@@ -964,7 +964,7 @@ phina.define('BossScene', {
     this.dragon1.setSize(256, 256).setPosition(this.gridX.span(3), this.gridY.span(5));  // ドラゴン1の位置調整
 
     // ドラゴン2の初期化（dragon2を使用）
-    this.dragon2HP = 500;  // 初期HP
+    this.dragon2HP = 2000;  // 初期HP
     this.maxDragon2HP = this.dragon2HP;  // 最大HP
     this.dragon2 = Dragon('dragon2').addChildTo(this);  // dragon2を使用
     this.dragon2.setSize(256, 256).setPosition(this.gridX.span(10), this.gridY.span(5));  // ドラゴン2の位置調整
