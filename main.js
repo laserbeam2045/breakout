@@ -44,7 +44,7 @@ const assets = {
     // ドラゴン（蒼）
     'dragon2': './assets/dragon2.png',
     // 火の玉
-    'fireball': './assets/fireball.png',
+    'fireball': './assets/fireball2.png',
     // 氷の玉
     'iceball': './assets/iceball.png',
   },
@@ -123,17 +123,31 @@ const assets = {
         },
       },
     },
+    // fireball_ss: {
+    //   frame: {
+    //     width: 512,
+    //     height: 512,
+    //     cols: 6,
+    //     rows: 1,
+    //   },
+    //   animations: {
+    //     fireball: {
+    //       frames: [0, 1, 2, 3, 4, 5],
+    //       frequency: 6,
+    //     }
+    //   },
+    // },
     fireball_ss: {
       frame: {
-        width: 512,
-        height: 512,
-        cols: 6,
-        rows: 1,
+        width: 192,
+        height: 192,
+        cols: 5,
+        rows: 4,
       },
       animations: {
         fireball: {
-          frames: [0, 1, 2, 3, 4, 5],
-          frequency: 6,
+          frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+          frequency: 3,
         }
       },
     },
@@ -142,12 +156,12 @@ const assets = {
         width: 192,
         height: 192,
         cols: 5,
-        rows: 4,
+        rows: 2,
       },
       animations: {
         iceball: {
-          frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-          frequency: 6,
+          frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          frequency: 5,
         }
       },
     },
@@ -483,7 +497,7 @@ phina.define('BaseGameScene', {
   },
 
   checkPaddleCollision: function(ball) {
-    if (this.isStopped) return;
+    if (this.isStopped || this.isShaking) return;
 
     if (ball.hitTestElement(this.paddle)) {
       // パドルの上に当たった場合
@@ -498,7 +512,6 @@ phina.define('BaseGameScene', {
           if (ball.isRainbow) {
             this.activateInvincibility();
           }
-
           // パドルの速度に基づいてスピンを加える
           const spinFactor = 0.1;  // スピンの強さを調整する係数
           ball.direction.x += this.paddleSpeed * spinFactor;  // パドルの速度に応じてボールのX方向のスピンを加える
@@ -606,14 +619,16 @@ phina.define('BaseGameScene', {
     setTimeout(() => {
       originalStates.forEach(state => {
         const sprite = state.sprite;
-        if (!sprite) return;
+        if (!sprite) {
+          return;
+        }
         sprite.x = state.x;  // 元の位置に戻す
         sprite.y = state.y;
         if (sprite.speed !== undefined) {
           sprite.speed = state.speed;  // 元の速度に戻す
         }
         if (sprite.direction) {
-          sprite.direction = state.direction;  // 元の方向に戻す（ボールの場合など）
+          sprite.direction = state.direction.clone();  // 元の方向に戻す（ボールの場合など）
         }
       });
       // 震動後のスプライトの状態を正常化する処理
@@ -1027,6 +1042,7 @@ phina.define('BossScene', {
     this.gameStarted = false;  // ゲーム開始前の状態
     this.isGameOver = false;   // ゲームオーバー状態
     this.clearFlag = false;    // ゲームクリア状態
+    this.isShaking = false;  // 震動中かどうか
     this.superInit();
     this.setupPlayer();
     this.setupDragons();
@@ -1162,6 +1178,10 @@ phina.define('BossScene', {
   update: function(app) {
     // 共通の操作を実行
     this.superMethod('update', app);
+
+    // パドルの速度を計算
+    // this.paddleSpeed = this.paddle.x - this.paddle.prevX;  // 前フレームからの移動距離で速度を計算
+    // this.paddle.prevX = this.paddle.x;  // 現在位置を次フレームに備えて保持
     
     if (this.isGameOver || this.clearFlag) {
       this.on('pointend', () => {
@@ -1188,10 +1208,6 @@ phina.define('BossScene', {
         this.checkPaddleCollision(ball);  // パドルとの衝突処理を呼び出し
         this.checkCollisions(ball);  // 他の衝突処理（ドラゴンや壁など）
       });
-
-      // パドルの速度を計算
-      this.paddleSpeed = this.paddle.x - this.paddle.prevX;  // 前フレームからの移動距離で速度を計算
-      this.paddle.prevX = this.paddle.x;  // 現在位置を次フレームに備えて保持
     } else {
       // パドルの移動を有効にする
       this.updatePaddle(app);
@@ -1636,9 +1652,8 @@ phina.define('Fireball', {
     // this.setSize(48, 48);  // 火の玉のサイズを48x48に設定
     // this.scaleX = 0.33;
     // this.scaleY = 0.33;
-    this.rotation = 90;  // 火の玉を下向きに回転
+    // this.rotation = 90;  // 火の玉を下向きに回転
     this.speed = 12;
-    
     // スプライトシートのアニメーション設定
     this.anim = FrameAnimation(`${skillName}_ss`).attachTo(this);
     this.anim.gotoAndPlay(skillName);
