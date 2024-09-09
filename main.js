@@ -45,6 +45,8 @@ const assets = {
     'dragon2': './assets/dragon2.png',
     // 火の玉
     'fireball': './assets/fireball.png',
+    // 氷の玉
+    'iceball': './assets/iceball.png',
   },
   sound: {
     'block_break': 'assets/block_break.mp3',  // サウンドファイルのパス
@@ -56,6 +58,7 @@ const assets = {
     'attack_sound': 'assets/重いパンチ1.mp3',  // サウンドファイルのパス
     'fireball_sound': 'assets/火炎魔法1.mp3',  // サウンドファイルのパス
     'dragon_sound': 'assets/ドラゴンの鳴き声2.mp3',  // サウンドファイルのパス
+    'iceball_sound': 'assets/氷魔法で凍結.mp3',  // サウンドファイルのパス
     // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
     // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
   },
@@ -134,11 +137,25 @@ const assets = {
         }
       },
     },
+    iceball_ss: {
+      frame: {
+        width: 192,
+        height: 192,
+        cols: 5,
+        rows: 4,
+      },
+      animations: {
+        iceball: {
+          frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+          frequency: 4,
+        }
+      },
+    },
   },
 };
 
 // ステージ数を画像の数に応じて設定
-const stageCount = Object.keys(assets.image).length - 4;
+const stageCount = Object.keys(assets.image).length - 5;
 
 phina.define('AllScene', {
   superClass: 'DisplayScene',
@@ -273,6 +290,10 @@ phina.define('BaseGameScene', {
     this.attackSound = AssetManager.get('sound', 'attack_sound');
     this.fireballSound = AssetManager.get('sound', 'fireball_sound');
     this.dragonSound = AssetManager.get('sound', 'dragon_sound');
+    this.iceballSound = AssetManager.get('sound', 'iceball_sound');
+    this.dragonSound.volume = 0.5;
+    this.fireballSound.volume = 0.5;
+    this.iceballSound.volume = 0.5;
     this.attackSound.volume = 0.25;
     this.cursorSound.volume = 0.5;
   },
@@ -1186,7 +1207,7 @@ phina.define('BossScene', {
       this.fireballCooldown += app.deltaTime;
       if (this.fireballCooldown > Math.random() * 500 + 500) {
         this.fireballCooldown = 0;  // クールダウンをリセット
-        this.spawnFireball(this.dragon1);  // 火の玉を発射
+        this.spawnFireball(this.dragon1, 'fireball');  // 火の玉を発射
       }
     }
     // ドラゴンが下を向いている場合にランダムに火の玉を吐く処理
@@ -1195,7 +1216,7 @@ phina.define('BossScene', {
       this.fireballCooldown += app.deltaTime;
       if (this.fireballCooldown > Math.random() * 500 + 500) {
         this.fireballCooldown = 0;  // クールダウンをリセット
-        this.spawnFireball(this.dragon2);  // 火の玉を発射
+        this.spawnFireball(this.dragon2, 'iceball');  // 火の玉を発射
       }
     }
 
@@ -1308,13 +1329,18 @@ phina.define('BossScene', {
   },
 
   // 火の玉を生成する関数
-  spawnFireball: function(dragon) {
+  spawnFireball: function(dragon, skillName) {
     if (this.isGameOver || this.clearFlag) return;
-    const fireball = Fireball().addChildTo(this);
+    const fireball = Fireball(skillName).addChildTo(this);
     fireball.setPosition(dragon.x, dragon.y + dragon.height / 2);
     this.fireballs.push(fireball);
     // this.dragon.addChildTo(this);
-    this.fireballSound.play();
+    if (skillName === 'fireball') {
+      this.fireballSound.play();
+    }
+    if (skillName === 'iceball') {
+      this.iceballSound.play();
+    }
   },
 
   // フィールドに存在するすべての火の玉を消す関数
@@ -1604,8 +1630,8 @@ phina.define('Paddle', {
 phina.define('Fireball', {
   superClass: 'Sprite',
 
-  init: function() {
-    this.superInit('fireball');
+  init: function(skillName = 'iceball') {
+    this.superInit(skillName);
     this.setOrigin(0.5, 0.5);
     // this.setSize(48, 48);  // 火の玉のサイズを48x48に設定
     // this.scaleX = 0.33;
@@ -1614,8 +1640,8 @@ phina.define('Fireball', {
     this.speed = 20;
     
     // スプライトシートのアニメーション設定
-    this.anim = FrameAnimation('fireball_ss').attachTo(this);
-    this.anim.gotoAndPlay('fireball');
+    this.anim = FrameAnimation(`${skillName}_ss`).attachTo(this);
+    this.anim.gotoAndPlay(skillName);
     this.anim.fit = false;
     this.setSize(192, 192);
   },
