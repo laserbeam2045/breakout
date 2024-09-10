@@ -116,8 +116,8 @@ phina.define('BossScene', {
     this.fireballs.forEach((fireball, index) => {
       fireball.move();
       if (fireball.hitTestElement(this.paddle) && !this.isInvincible) {
-        if (!(fireball.bottom > this.paddle.top + 50)) return;
-        this.pauseAllAndShake();
+        if (!(fireball.bottom > this.paddle.top + 20)) return;
+        this.pauseAllAndShake(config.scene.boss.shakeDurationByAttack);
         this.player.HP -= 10;
         fireball.remove();
         this.fireballs.splice(index, 1);
@@ -234,23 +234,15 @@ phina.define('BossScene', {
     }
 
     // ドラゴンが下を向いている場合にランダムに火の玉を吐く処理
-    if (this.dragon1 && this.dragon1.direction === 'down') {
-      if (this.isGameOver) return;
-      this.fireballCooldown += app.deltaTime;
-      if (this.fireballCooldown > Math.random() * 1000 + 1000) {
-        this.fireballCooldown = 0;  // クールダウンをリセット
-        this.spawnFireball(this.dragon1, 'fireball');  // 火の玉を発射
+    this.dragons.forEach(dragon => {
+      if (dragon?.direction === 'down') {
+        this.fireballCooldown += app.deltaTime;
+        if (this.fireballCooldown > Math.random() * 1000 + 1000) {
+          this.fireballCooldown = 0;  // クールダウンをリセット
+          this.spawnFireball(dragon, 'fireball');  // 火の玉を発射
+        }
       }
-    }
-    // ドラゴンが下を向いている場合にランダムに火の玉を吐く処理
-    if (this.dragon2 && this.dragon2.direction === 'down') {
-      if (this.isGameOver) return;
-      this.fireballCooldown += app.deltaTime;
-      if (this.fireballCooldown > Math.random() * 500 + 500) {
-        this.fireballCooldown = 0;  // クールダウンをリセット
-        this.spawnFireball(this.dragon2, 'iceball');  // 火の玉を発射
-      }
-    }
+    })
 
     // // 各火の玉の移動と衝突判定
     // this.fireballs.forEach((fireball, index) => {
@@ -381,8 +373,6 @@ phina.define('BossScene', {
 
   // ドラゴンとの衝突判定
   checkDragonCollision: function(ball, dragon) {
-    // if (!dragon) return;
-    // if (this.deadFlags[dragonName === 'dragon1' ? 0 : 1]) return;
     if (ball.hitTestElement(dragon)) {
       // ボールがドラゴンに当たった際の反射処理
       ball.reflectY();

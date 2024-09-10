@@ -265,7 +265,7 @@ phina.define('BaseScene', {
     }
   },
 
-  pauseAllAndShake: function(shakeTime = SHAKE_TIME) {
+  pauseAllAndShake: function(shakeTime) {
     const scene = this;
     scene.isStopped = true;
   

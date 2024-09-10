@@ -17,7 +17,8 @@ export const config = {
       },
     },
     boss: {
-
+      shakeDurationByAttack: 300,
+      shakeDurationByClear: 1500,
     },
   },
   ball: {
