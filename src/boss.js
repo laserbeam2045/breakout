@@ -10,7 +10,6 @@ phina.define('BossScene', {
     this.soundCooldownDuration = 100;  // サウンドが鳴った後に再度鳴るまでの待機時間（ミリ秒）
     this.fireballCooldown = 0;  // 火の玉のクールダウンタイマー
     this.fireballs = [];
-    this.deadFlags = [false, false];  // 各ドラゴンの状態を管理
   },
 
   setupGame: function() {
@@ -86,31 +85,6 @@ phina.define('BossScene', {
     this.paddle.hold(this.balls[0]);
     this.on('pointend', this.startGame.bind(this));
   },
-
-  // updateDragonHP: function() {
-  //   if (!this.clearFlag) {
-  //     if (this.dragon1HP <= 0) {
-  //       this.dragon1HP = 0;
-  //       this.hpGauge1.remove();
-  //     }
-  //     if (this.dragon2HP <= 0) {
-  //       this.dragon2HP = 0;
-  //       this.hpGauge2.remove();
-  //     }
-  //     this.hpLabel1.text = `Red Dragon: ${this.dragon1HP}`;
-  //     this.hpGauge1.width = (this.dragon1HP / this.maxDragon1HP) * 300;
-  //     this.hpLabel2.text = `Blue Dragon: ${this.dragon2HP}`;
-  //     this.hpGauge2.width = (this.dragon2HP / this.maxDragon2HP) * 300;
-
-  //     if (this.dragon1HP <= 0 && !this.deadFlags[0]) this.handleDragonDeath('dragon1', 0);
-  //     if (this.dragon2HP <= 0 && !this.deadFlags[1]) this.handleDragonDeath('dragon2', 1);
-
-  //     if (this.dragon1HP <= 0 && this.dragon2HP <= 0) {
-  //       this.clearFlag = true;
-  //       setTimeout(() => this.gameClear(), 1500);
-  //     }
-  //   }
-  // },
 
   updateFireballs: function(app) {
     this.fireballs.forEach((fireball, index) => {
@@ -189,6 +163,7 @@ phina.define('BossScene', {
     // 共通の操作を実行
     this.superMethod('update', app);
 
+    // クリアした状態ならここでreturnする
     if (this.isGameOver) {
       this.on('pointend', () => {
         this.exit('title');
@@ -199,28 +174,25 @@ phina.define('BossScene', {
       return;
     }
 
-    // ドラゴンが倒れたらゲームクリア
+    // ドラゴン共が倒れたらゲームクリア
     if (this.isGameClear()) {
       this.gameClear()
     }
 
-    // パドルの速度を計算
-    // this.paddleSpeed = this.paddle.x - this.paddle.prevX;  // 前フレームからの移動距離で速度を計算
-    // this.paddle.prevX = this.paddle.x;  // 現在位置を次フレームに備えて保持
-
-    if (app.isStopped || app.isGameOver) return;
-
     if (this.player.HP.value <= 0) {
       this.gameOver();
     }
-    // this.updateDragonHP();
+
+    if (app.isStopped) {
+      return;
+    }
+
     this.updateFireballs(app);
     this.updateBallsAndPaddle(app);
 
     if (this.isGameStarted) {
       this.balls.forEach(ball => {
         ball.move();
-        // this.adjustBallAngle(ball);
         this.checkPaddleCollision(ball);  // パドルとの衝突処理を呼び出し
         this.checkCollisions(ball);  // 他の衝突処理（ドラゴンや壁など）
       });
@@ -307,33 +279,6 @@ phina.define('BossScene', {
     //   this.movePaddle(app.pointer);
     // }
 
-    // // ドラゴンのHPが0になったらゲームクリア
-    // if (this.dragon1HP <= 0 && !this.deadFlags[0]) {
-    //   this.deadFlags[0] = true;
-    //   this.dragon1HP = 0;
-    //   this.hpGauge1.remove();
-    //   this.pauseAllAndShake(1500);
-    //   setTimeout(() => {
-    //     this.dragon1.remove();
-    //   }, 1500);
-    // }
-    // // ドラゴンのHPが0になったらゲームクリア
-    // if (this.dragon2HP <= 0 && !this.deadFlags[1]) {
-    //   this.deadFlags[1] = true;
-    //   this.dragon2HP = 0;
-    //   this.hpGauge2.remove();
-    //   this.pauseAllAndShake(1500);
-    //   setTimeout(() => {
-    //     this.dragon2.remove();
-    //   }, 1500);
-    // }
-    // if (this.dragon1HP <= 0 && this.dragon2HP <= 0 && !this.clearFlag) {
-    //   this.clearFlag = true;
-    //   this.fireballs.forEach((fire) => fire.remove());
-    //   setTimeout(() => {
-    //     this.gameClear();
-    //   }, 1500);
-    // }
     // プレイヤーのHPが0になったらゲームオーバー
     if (this.player.HP <= 0) {
       this.playerHPGauge.remove();
