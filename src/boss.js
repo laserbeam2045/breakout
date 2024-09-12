@@ -1,4 +1,4 @@
-import { config } from '../config.js?version=1.0.0';
+import { config } from '../config.js?version=1.0.1';
 
 phina.define('BossScene', {
   superClass: 'BaseScene',
@@ -392,6 +392,9 @@ phina.define('Dragon', {
     this.anim = FrameAnimation(animation).attachTo(this);
     this.anim.fit = false;
     this.setSize(size, size);
+
+    // 当たり判定のサイズ（スプライトサイズより小さく設定）
+    this.hitAreaRadius = 200;  // ここで当たり判定の大きさを設定
   },
 
   update: function(app) {
@@ -515,6 +518,15 @@ phina.define('Dragon', {
     if (this.y < this.height / 2) {
       this.y = this.height / 2;
     }
+  },
+
+  // カスタムの当たり判定メソッド
+  hitTestElement: function(target) {
+    // スプライトの見た目の大きさではなく、カスタムの判定範囲を使用
+    const dx = this.x - target.x;
+    const dy = this.y - target.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < this.hitAreaRadius + target.width / 2;
   },
 });
 

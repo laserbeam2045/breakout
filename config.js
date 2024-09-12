@@ -18,7 +18,7 @@ export const config = {
     },
     boss: {
       attack: {
-        speed: 14,
+        speed: 12,
       },
     },
   },

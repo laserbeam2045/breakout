@@ -44,9 +44,11 @@ phina.define('BaseScene', {
     this.fireballSound = AssetManager.get('sound', 'fireball_sound');
     this.dragonSound = AssetManager.get('sound', 'dragon_sound');
     this.iceballSound = AssetManager.get('sound', 'iceball_sound');
-    this.dragonSound.volume = 0.5;
-    this.fireballSound.volume = 0.5;
-    this.iceballSound.volume = 0.5;
+    this.paddleReflectSound.volume = 0.33;
+    this.clearSound.volume = 0.5;
+    this.dragonSound.volume = 0.33;
+    this.fireballSound.volume = 0.33;
+    this.iceballSound.volume = 0.33;
     this.attackSound.volume = 0.25;
     this.cursorSound.volume = 0.5;
   },
