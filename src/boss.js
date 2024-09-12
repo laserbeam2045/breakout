@@ -29,13 +29,13 @@ phina.define('BossScene', {
     }
 
     // クリアした状態ならここでreturnする
-    if (this.isGameEnd) {
+    if (this.isGameEnd || this.isGameOver) {
       this.on('pointend', () => this.exit('title'));
       if (app.keyboard.getKeyDown('space')) this.exit('title');
       return;
     }
 
-    if (this.isGameOver) return
+    if (this.isGameClear) return
 
     // ドラゴンが倒れたらゲームクリア
     if (this.isDragonsDead()) {
@@ -210,7 +210,8 @@ phina.define('BossScene', {
   gameClear: async function() {
     const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
 
-    this.isGameOver = true;
+    // TODO: ロジックを変える必要がある
+    this.isGameClear = true
 
     this.dragonSound.play()
     await this.pause(stopDuration)
@@ -222,6 +223,7 @@ phina.define('BossScene', {
 
     // TODO: ロジックを変える必要がある
     this.isGameEnd = true
+    this.isGameOver = true
 
     Label({
       text: 'Game Clear!',
