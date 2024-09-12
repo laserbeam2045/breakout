@@ -125,10 +125,13 @@ phina.define('BossScene', {
 
       const x = this.gridX.span(Math.floor(Math.random() * 3) + 1);
       const y = this.gridX.span(Math.floor(Math.random() * 3) + 1);
-
-      // 手前に表示したいのでここで追加
-      dragon.setPosition(x, y).addChildTo(this);
+      dragon.setPosition(x, y)
     });
+
+    this.dragons.forEach(dragon => {
+      // 手前に表示したいのでここで追加
+      dragon.addChildTo(this)
+    })
   },
 
   // パドルの初期化
