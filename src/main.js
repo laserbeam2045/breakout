@@ -1,4 +1,4 @@
-import { config } from '../config.js';
+import { config } from '../config.js?version=1.1.1';
 import { assets } from '../assets.js';
 
 phina.define("MainScene", {
