@@ -248,7 +248,7 @@ phina.define('BossScene', {
 
   // 火の玉を生成する関数
   spawnFireball: function(dragon, skillName) {
-    if (this.isGameOver) return;
+    if (this.isGameOver || this.isStopping || this.isShaking || this.isHitStop) return;
     const fireball = Fireball(skillName).addChildTo(this);
     fireball.setPosition(dragon.x, dragon.y + dragon.height / 2);
     this.fireballs.push(fireball);
@@ -411,7 +411,16 @@ phina.define('Dragon', {
   },
 
   update: function(app) {
-    if (this.finished) {
+    const { currentScene } = app
+    if (currentScene.isGameOver || currentScene.isStopping || currentScene.isShaking || currentScene.isHitStop) {
+      this.anim.finished = true
+      this.anim.paused = true
+      return
+    }
+    console.log(false)
+    this.anim.finished = false
+    this.anim.paused = false
+  if (this.finished) {
       this.anim.finished = true
       this.anim.paused = true
       return
