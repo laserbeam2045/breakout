@@ -17,8 +17,9 @@ export const config = {
       },
     },
     boss: {
-      shakeDurationByAttack: 300,
-      shakeDurationByClear: 1500,
+      attack: {
+        speed: 16,
+      },
     },
   },
   ball: {
@@ -58,6 +59,18 @@ export const config = {
     width: 180,
     height: 80,
     fontSize: 30,
+  },
+  hitStop: {
+    small: {
+      stopDuration: 0,
+      shakeDuration: 200,
+      shakeStrength: 10,
+    },
+    large: {
+      stopDuration: 500,
+      shakeDuration: 2000,
+      shakeStrength: 20,
+    },
   },
   // パラメータ内での計算や参照
   get combinedSpeed() {

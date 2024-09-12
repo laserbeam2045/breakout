@@ -1,6 +1,22 @@
 import { config } from '../config.js';
 import { assets } from '../assets.js';
 
+const sleep = time => new Promise((resolve) => setTimeout(resolve, time))
+
+phina.define('StopScene', {
+  superClass: 'DisplayScene',
+
+  init: function(stopDuration) {
+    this.superInit()
+    this.setInteractive(false)
+    this.backgroundColor = 'rgba(0, 0, 0, 0)';
+    setTimeout(() => {
+      this.setInteractive(true)
+      this.exit()
+    }, stopDuration)
+  },
+})
+
 phina.define('BaseScene', {
   superClass: 'GeneralScene',
 
@@ -209,7 +225,7 @@ phina.define('BaseScene', {
   },
 
   checkPaddleCollision: function(ball) {
-    if (this.isStopped || this.isShaking) return;
+    if (this.isShaking) return;
 
     if (ball.hitTestElement(this.paddle)) {
       // パドルの上に当たった場合
@@ -240,11 +256,8 @@ phina.define('BaseScene', {
 
           // 紫色のボールの場合は再度分裂
           if (ball.isPurple) {
-            // this.pauseAllAndShake(ball);
-            // setTimeout(() => {
-              ball.isPurple = false;
-              this.splitBall(ball, 10);
-            // }, SHAKE_TIME);
+            ball.isPurple = false;
+            this.splitBall(ball, 10);
           }
 
           // ボールが1つだけの場合に分裂させる
@@ -265,10 +278,18 @@ phina.define('BaseScene', {
     }
   },
 
-  pauseAllAndShake: function(shakeTime) {
+  pause: function(stopDuration) {
+    // シーンを追加することで動きを止める
+    this.app.pushScene(StopScene(stopDuration))
+
+    return new Promise((resolve) => setTimeout(resolve, stopDuration))
+  },
+
+  shake: async function(shakeDuration, shakeStrength) {
     const scene = this;
-    scene.isStopped = true;
-  
+
+    scene.isShaking = true
+
     // すべてのスプライトの元の状態を保存する配列
     const originalStates = [];
 
@@ -323,9 +344,8 @@ phina.define('BaseScene', {
     // 画面を震動させる
     scene.children.forEach(element => {
       if (element.className === 'Ball') return;
-      this.shakeElement(element, shakeTime);
+      this.shakeElement(element, shakeDuration, shakeStrength);
     });
-    this.paddleReflectSound.play();
 
     // 一定時間後にすべてのボールの状態を元に戻す
     setTimeout(() => {
@@ -349,25 +369,28 @@ phina.define('BaseScene', {
           element.restorePosition();  // restorePosition 関数を追加して元の位置に戻す
         }
       });
-      // this.splitBall(ball, 10);
-      // if (ball) ball.isPurple = false;
-      scene.isStopped = false;
-    }, shakeTime);
+    }, shakeDuration);
+
+    scene.isShaking = false
+
+    return new Promise((resolve) => setTimeout(resolve, shakeDuration))
   },
   
   // 特定の要素を震動させる関数
-  shakeElement: function(element, shakeTime) {
+  shakeElement: function(element, shakeDuration, shakeStrength) {
     const originalPosition = { x: element.x, y: element.y };  // 元の位置を保存
-    let shakeDuration = shakeTime;  // 震動時間
-    let shakeStrength = 10;   // 震動の強さ
     let startTime = Date.now();  // 開始時刻
 
     const shake = () => {
       const elapsedTime = Date.now() - startTime;
       if (elapsedTime < shakeDuration) {
         // ランダムに要素をシェイク
-        let shakeX = (Math.random() - 0.5) * shakeStrength;
-        let shakeY = (Math.random() - 0.5) * shakeStrength;
+        const strengthFactor = 1 - (elapsedTime / shakeDuration); // 時間に応じて強度を減少させる
+        const currentStrength = shakeStrength * strengthFactor;
+
+        // ランダムに要素をシェイク
+        let shakeX = (Math.random() - 0.5) * currentStrength;
+        let shakeY = (Math.random() - 0.5) * currentStrength;
   
         // 要素の位置をシェイク
         element.x = originalPosition.x + shakeX;

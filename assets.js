@@ -7,7 +7,7 @@ export const assets = {
     // ドラゴン（蒼）
     'BlueDragon': './assets/dragon2.png',
     // 火の玉
-    'fireball': './assets/fireball2.png',
+    'fireball': './assets/fireball3.png',
     // 氷の玉
     'iceball': './assets/iceball.png',
     // エジソン
@@ -115,7 +115,7 @@ export const assets = {
         width: 192,
         height: 192,
         cols: 5,
-        rows: 4,
+        rows: 6,
       },
       animations: {
         fireball: {

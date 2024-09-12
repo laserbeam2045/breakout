@@ -65,7 +65,7 @@ phina.define("MainScene", {
   },
 
   update: function(app) {
-    if (app.isStopped) return;
+    if (app.isShaking) return;
 
     this.time += app.deltaTime;
 
@@ -156,6 +156,7 @@ phina.main(function() {
       { label: 'title', className: 'TitleScene' },
       { label: 'main', className: 'MainScene' },
       { label: 'boss', className: 'BossScene' },
+      { label: 'stop', className: 'StopScene' },
     ],
   });
 

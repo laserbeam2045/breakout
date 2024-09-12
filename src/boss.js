@@ -6,17 +6,73 @@ phina.define('BossScene', {
   init: function(options) {
     this.superInit(options);
     this.setupGame();
+  },
+
+  setupGame: function() {
     this.soundCooldown = false;  // サウンド再生クールダウンフラグ
     this.soundCooldownDuration = 100;  // サウンドが鳴った後に再度鳴るまでの待機時間（ミリ秒）
     this.fireballCooldown = 0;  // 火の玉のクールダウンタイマー
     this.fireballs = [];
-  },
-
-  setupGame: function() {
     this.setupPlayer();
     this.setupDragons();
     this.setupPaddle();
     this.setupBalls();
+  },
+
+  update: function(app) {
+    // 共通の操作を実行
+    this.superMethod('update', app);
+
+    // クリアした状態ならここでreturnする
+    if (this.isGameOver) {
+      this.on('pointend', () => this.exit('title'));
+      if (app.keyboard.getKeyDown('space')) this.exit('title');
+      return;
+    }
+
+    // 震動中はここでストップ
+    if (app.isShaking) {
+      return;
+    }
+
+    // ドラゴンが倒れたらゲームクリア
+    if (this.isDragonsDead()) {
+      this.gameClear()
+    }
+
+    // プレイヤーのHPが0になったらゲームオーバー
+    if (this.player.HP.value <= 0) {
+      this.gameOver();
+    }
+
+    this.updateFireballs(app);
+    this.updateBallsAndPaddle(app);
+
+    if (this.isGameStarted) {
+      this.balls.forEach(ball => {
+        ball.move();
+        this.checkPaddleCollision(ball);  // パドルとの衝突処理を呼び出し
+        this.checkCollisions(ball);  // 他の衝突処理（ドラゴンや壁など）
+      });
+    } else {
+      // パドルの移動を有効にする
+      this.updatePaddle(app);
+      // ゲームが開始されていない間はボールをパドルに追従させる
+      this.balls.forEach(ball => {
+        ball.setPosition(this.paddle.x, this.paddle.top - 20);
+      });
+    }
+
+    // ドラゴンが下を向いている場合にランダムに火の玉を吐く処理
+    this.dragons.forEach(dragon => {
+      if (dragon?.direction === 'down') {
+        this.fireballCooldown += app.deltaTime;
+        if (this.fireballCooldown > Math.random() * 1000 + 1000) {
+          this.fireballCooldown = 0;
+          this.spawnFireball(dragon, dragon.name === 'RedDragon' ? 'fireball' : 'iceball');
+        }
+      }
+    })
   },
 
   // プレイヤーの初期化
@@ -49,10 +105,6 @@ phina.define('BossScene', {
     ];
 
     this.dragons.forEach((dragon, idx) => {
-      const x = this.gridX.span(Math.floor(Math.random() * 3) + 1);
-      const y = this.gridX.span(Math.floor(Math.random() * 3) + 1);
-      dragon.setPosition(x, y).addChildTo(this);
-
       // HPバーの設定（画面左・右に配置）
       Gauge({
         width: 300,
@@ -65,6 +117,12 @@ phina.define('BossScene', {
       })
       .setPosition(170 + 300 * idx, this.gridY.span(2))
       .addChildTo(this);
+
+      const x = this.gridX.span(Math.floor(Math.random() * 3) + 1);
+      const y = this.gridX.span(Math.floor(Math.random() * 3) + 1);
+
+      // 手前に表示したいのでここで追加
+      dragon.setPosition(x, y).addChildTo(this);
     });
   },
 
@@ -86,15 +144,18 @@ phina.define('BossScene', {
     this.on('pointend', this.startGame.bind(this));
   },
 
-  updateFireballs: function(app) {
-    this.fireballs.forEach((fireball, index) => {
+  updateFireballs: async function(app) {
+    this.fireballs.forEach(async (fireball, index) => {
       fireball.move();
       if (fireball.hitTestElement(this.paddle) && !this.isInvincible) {
         if (!(fireball.bottom > this.paddle.top + 20)) return;
-        this.pauseAllAndShake(config.scene.boss.shakeDurationByAttack);
-        this.player.HP -= 10;
+        const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
+        this.player.HP.value -= 10;
+        this.paddleReflectSound.play();
+        await this.pause(stopDuration)
         fireball.remove();
         this.fireballs.splice(index, 1);
+        await this.shake(shakeDuration, shakeStrength);
       }
     });
   },
@@ -120,23 +181,33 @@ phina.define('BossScene', {
 
   checkCollisions: function(ball) {
     if (!ball.isOnCooldown) {
-      this.dragons.forEach((dragon, idx) => {
+      this.dragons.forEach(async (dragon, idx) => {
         if (!dragon) return
         if (this.checkDragonCollision(ball, dragon)) {
+          const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
           dragon.remove();
           this.dragons[idx] = null;
+          this.dragonSound.play()
+          await this.pause(stopDuration)
+          await this.shake(shakeDuration, shakeStrength);
         }
       })
     }
     this.checkWallCollision(ball);
   },
 
-  gameClear: function() {
+  gameClear: async function() {
     this.isGameOver = true;
+    const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
+
+    this.dragonSound.play()
+    await this.pause(stopDuration)
+    await this.shake(shakeDuration, shakeStrength);
+    this.clearSound.play();
     this.paddle.remove();
     this.removeAllBalls();
-    this.clearSound.play();
     this.removeAllFireballs();
+
     Label({
       text: 'Game Clear!',
       fontSize: 64,
@@ -151,139 +222,10 @@ phina.define('BossScene', {
   },
 
   // ドラゴンが全て死んだときに呼ぶとtrueが返る
-  isGameClear: function() {
-    if (this.dragons.every(dragon => {
-      return (dragon?.HP.value ?? 0) <= 0
-    })) return true
+  isDragonsDead: function() {
+    if (this.dragons.every(dragon => (dragon?.HP.value ?? 0) <= 0)) return true
 
     return false
-  },
-
-  update: function(app) {
-    // 共通の操作を実行
-    this.superMethod('update', app);
-
-    // クリアした状態ならここでreturnする
-    if (this.isGameOver) {
-      this.on('pointend', () => {
-        this.exit('title');
-      });
-      if (app.keyboard.getKeyDown('space')) {
-        this.exit('title');
-      }
-      return;
-    }
-
-    // ドラゴン共が倒れたらゲームクリア
-    if (this.isGameClear()) {
-      this.gameClear()
-    }
-
-    if (this.player.HP.value <= 0) {
-      this.gameOver();
-    }
-
-    if (app.isStopped) {
-      return;
-    }
-
-    this.updateFireballs(app);
-    this.updateBallsAndPaddle(app);
-
-    if (this.isGameStarted) {
-      this.balls.forEach(ball => {
-        ball.move();
-        this.checkPaddleCollision(ball);  // パドルとの衝突処理を呼び出し
-        this.checkCollisions(ball);  // 他の衝突処理（ドラゴンや壁など）
-      });
-    } else {
-      // パドルの移動を有効にする
-      this.updatePaddle(app);
-      // ゲームが開始されていない間はボールをパドルに追従させる
-      this.balls.forEach(ball => {
-        ball.setPosition(this.paddle.x, this.paddle.top - 20);  // パドルにボールを追従させる
-      });
-    }
-
-    // ドラゴンが下を向いている場合にランダムに火の玉を吐く処理
-    this.dragons.forEach(dragon => {
-      if (dragon?.direction === 'down') {
-        this.fireballCooldown += app.deltaTime;
-        if (this.fireballCooldown > Math.random() * 1000 + 1000) {
-          this.fireballCooldown = 0;  // クールダウンをリセット
-          this.spawnFireball(dragon, 'fireball');  // 火の玉を発射
-        }
-      }
-    })
-
-    // // 各火の玉の移動と衝突判定
-    // this.fireballs.forEach((fireball, index) => {
-    //   fireball.move();
-    //   if (fireball.hitTestElement(this.paddle)) {
-    //     if (!(fireball.bottom > this.paddle.top + 50)) return;
-    //     // console.log(fireball.bottom, this.paddle.top)
-    //     this.pauseAllAndShake();
-    //     // setTimeout(() => {
-    //       this.player.HP -= 10;  // プレイヤーのHPを減らす
-    //       this.playerHPLabel.text = `HP: ${this.player.HP}`;
-    //       fireball.remove();  // 衝突後火の玉を消す
-    //       this.fireballs.splice(index, 1);  // 配列から削除
-    //     // }, SHAKE_TIME);
-    //   }
-    // });
-
-    // if (this.isGameOver || this.clearFlag) {
-    //   this.on('pointend', () => {
-    //     if (this.endFlag) this.exit('title');
-    //     setTimeout(() => this.endFlag = true, 500);
-    //   });
-    //   if (app.keyboard.getKeyDown('space')) {
-    //     this.exit('title');
-    //   }
-    //   return;
-    // }
-
-    // if (this.isGameStarted) {
-    //   // 毎フレーム呼ばれる。制限時間のカウントダウンを処理
-    //   this.remainingTime -= app.deltaTime / 1000;  // 残り時間を秒単位で減らす
-
-    //   // 画面に制限時間を小数点以下1桁まで表示
-    //   // this.timeLabel.text = 'Time: ' + Math.max(0, this.remainingTime).toFixed(1);
-
-    //   // 残り時間が0以下になったらゲームオーバー
-    //   if (this.remainingTime <= 0) {
-    //     this.gameOver();
-    //   }
-    // }
-
-    // if (this.isGameOver || this.clearFlag) {
-    //   // ゲームオーバーまたはクリア時にボールをすべて消去
-    //   this.removeAllBalls();
-    // }
-
-    // if (!this.isGameStarted && app.keyboard.getKeyDown('space')) {
-    //   this.startGame();
-    // }
-
-    // // 色付きボールを最後に表示するために再配置
-    // this.balls.forEach(ball => {
-    //   if (ball.isGolden || ball.isPurple) {
-    //     ball.remove();  // 一度削除して
-    //     ball.addChildTo(this);  // 最後に再追加
-    //   }
-    // });
-
-    // if (this.isPC) {
-    //   this.movePaddleWithKeyboard(app.keyboard);
-    // } else {
-    //   this.movePaddle(app.pointer);
-    // }
-
-    // プレイヤーのHPが0になったらゲームオーバー
-    if (this.player.HP <= 0) {
-      this.playerHPGauge.remove();
-      this.gameOver();
-    }
   },
 
   // 火の玉を生成する関数
@@ -292,12 +234,9 @@ phina.define('BossScene', {
     const fireball = Fireball(skillName).addChildTo(this);
     fireball.setPosition(dragon.x, dragon.y + dragon.height / 2);
     this.fireballs.push(fireball);
-    // this.dragon.addChildTo(this);
-    if (skillName === 'fireball') {
-      this.fireballSound.play();
-    }
-    if (skillName === 'iceball') {
-      this.iceballSound.play();
+    switch(skillName) {
+      case 'fireball': this.fireballSound.play(); break
+      case 'iceball': this.iceballSound.play(); break
     }
   },
 
@@ -309,9 +248,7 @@ phina.define('BossScene', {
   // 壁との衝突判定
   checkWallCollision: function(ball) {
     this.superMethod('checkWallCollision', ball);
-    // 画面の端にボールが当たった場合
     if (ball.left < 0 || ball.right > config.screen.width || ball.top < 0 || ball.bottom > config.screen.height) {
-      // 壁に当たったらクールダウンを解除
       ball.isOnCooldown = false;
     }
   },
@@ -325,10 +262,11 @@ phina.define('BossScene', {
       // ボールのクールダウンタイマーを開始
       this.startBallCooldown(ball);
 
+      // 一定時間後に再びサウンドを再生可能にする
       if (!this.soundCooldown) {
         this.soundCooldown = true;
         setTimeout(() => {
-          this.soundCooldown = false;  // 一定時間後に再びサウンドを再生可能にする
+          this.soundCooldown = false;
         }, this.soundCooldownDuration);
         this.attackSound.play();
       }
@@ -383,12 +321,7 @@ phina.define('Fireball', {
   init: function(skillName = 'iceball') {
     this.superInit(skillName);
     this.setOrigin(0.5, 0.5);
-    // this.setSize(48, 48);  // 火の玉のサイズを48x48に設定
-    // this.scaleX = 0.33;
-    // this.scaleY = 0.33;
-    // this.rotation = 90;  // 火の玉を下向きに回転
-    this.speed = 12;
-    // スプライトシートのアニメーション設定
+    this.speed = config.scene.boss.attack.speed;
     this.anim = FrameAnimation(`${skillName}_ss`).attachTo(this);
     this.anim.gotoAndPlay(skillName);
     this.anim.fit = false;
@@ -487,18 +420,10 @@ phina.define('Dragon', {
 
     // 選ばれた方向に応じたアニメーションを再生
     switch (this.direction) {
-      case 'right':
-        this.fly2();
-        break;
-      case 'left':
-        this.fly4();
-        break;
-      case 'up':
-        this.fly1();
-        break;
-      case 'down':
-        this.fly3();
-        break;
+      case 'up': this.fly1(); break;
+      case 'down': this.fly3(); break;
+      case 'left': this.fly4(); break;
+      case 'right': this.fly2(); break;
     }
   },
 
@@ -625,7 +550,7 @@ phina.define('Gauge', {
     return (this.options.width * this._clamp(value, 0, this.options.maxValue)) / this.options.maxValue;
   },
 
-  // クランプ関数を独自に実装
+  // 値をmin, maxの範囲内に収めるメソッド
   _clamp: function(value, min, max) {
     return Math.max(min, Math.min(max, value));
   }
