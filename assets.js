@@ -32,6 +32,7 @@ export const assets = {
     'fireball_sound': 'assets/火炎魔法1.mp3',  // サウンドファイルのパス
     'dragon_sound': 'assets/ドラゴンの鳴き声2.mp3',  // サウンドファイルのパス
     'iceball_sound': 'assets/氷魔法で凍結.mp3',  // サウンドファイルのパス
+    'kill_sound': 'assets/必殺技ヒット.mp3',  // サウンドファイルのパス
     // 'ball_return': 'assets/ball_return.mp3',  // サウンドファイルのパス
     // 'heaven_and_hell': 'assets/heaven_and_hell.wav',  // サウンドファイルのパス
   },

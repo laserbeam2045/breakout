@@ -46,7 +46,9 @@ phina.define('BaseScene', {
     this.fireballSound = AssetManager.get('sound', 'fireball_sound');
     this.dragonSound = AssetManager.get('sound', 'dragon_sound');
     this.iceballSound = AssetManager.get('sound', 'iceball_sound');
+    this.killSound = AssetManager.get('sound', 'kill_sound');
     this.paddleReflectSound.volume = 0.33;
+    this.killSound.volume = 0.33;
     this.clearSound.volume = 0.5;
     this.dragonSound.volume = 0.33;
     this.fireballSound.volume = 0.33;
@@ -340,13 +342,12 @@ phina.define('BaseScene', {
     }
   },
 
-  pause: function(stopDuration) {
-    if (this.isStopping) return new Promise((resolve, reject) => resolve())
+  pause: async function(stopDuration) {
+    if (this.isStopping) return new Promise((resolve) => setTimeout(() => resolve, stopDuration))
     this.isStopping = true
 
     // シーンを追加することで動きを止める
     this.app.pushScene(StopScene(stopDuration))
-
     return new Promise((resolve) => setTimeout(() => {
       this.isStopping = false
       resolve()

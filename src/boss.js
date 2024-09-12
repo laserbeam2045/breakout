@@ -106,7 +106,7 @@ phina.define('BossScene', {
   setupDragons: function() {
     this.dragons = [
       Dragon({ HP: 500, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 1000, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 500, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
@@ -195,12 +195,13 @@ phina.define('BossScene', {
         if (this.isHitStop) return
         if (!dragon) return
         if (this.checkDragonCollision(ball, dragon)) {
-          const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
+          const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
           this.dragonSound.play()
           await this.pause(stopDuration)
-          dragon.remove();
           this.dragons[idx] = null;
+          this.killSound.play()
           await this.shake(shakeDuration, shakeStrength);
+          dragon.remove();
         }
       })
     }
@@ -213,7 +214,6 @@ phina.define('BossScene', {
     // TODO: ロジックを変える必要がある
     this.isGameClear = true
 
-    this.dragonSound.play()
     await this.pause(stopDuration)
     await this.shake(shakeDuration, shakeStrength);
     this.clearSound.play();
@@ -630,7 +630,7 @@ phina.define('Gauge', {
     const delta = targetValue - this.currentValue;
     const smoothSpeed = app.deltaTime / this.options.smoothDuration;
 
-    if (Math.abs(delta) > 0.1) {
+    if (Math.abs(delta) > 0.1 || targetValue <= 0) {
       this.currentValue += delta * smoothSpeed;
     } else {
       this.currentValue = targetValue;  // わずかな差になったら直接セット
