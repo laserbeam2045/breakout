@@ -67,9 +67,9 @@ export const config = {
       shakeStrength: 10,
     },
     large: {
-      stopDuration: 500,
+      stopDuration: 750,
       shakeDuration: 2000,
-      shakeStrength: 20,
+      shakeStrength: 25,
     },
   },
   // パラメータ内での計算や参照

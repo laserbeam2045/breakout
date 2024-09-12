@@ -84,7 +84,7 @@ phina.define('BossScene', {
   setupPlayer: function() {
     this.player = {
       HP: {
-        value: 50,
+        value: 100,
       },
     };
 
@@ -105,14 +105,14 @@ phina.define('BossScene', {
   // ドラゴン（複数体）の初期化
   setupDragons: function() {
     this.dragons = [
-      Dragon({ HP: 1000, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 2000, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 500, size: 256, name: 'RedDragon', color: 'red' }),
+      Dragon({ HP: 1000, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
       // HPバーの設定（画面左・右に配置）
       Gauge({
-        width: 300,
+        width: 280,
         height: 20,
         maxValue: dragon.HP.value,
         valueObject: dragon.HP,
@@ -120,7 +120,7 @@ phina.define('BossScene', {
         backGroundColor: 'darkred',
         labelText: `${dragon.name}: `,
       })
-      .setPosition(170 + 300 * idx, 50)
+      .setPosition(170 + 310 * idx, 50)
       .addChildTo(this);
 
       const x = this.gridX.span(Math.floor(Math.random() * 3) + 1);
@@ -587,6 +587,7 @@ phina.define('Gauge', {
       labelText: 'HP',
       fontSize: 16,
       labelColor: 'white',
+      smoothDuration: 500,  // HPの変化を滑らかにする時間（ミリ秒）
     };
 
     // デフォルト値とオプションをマージ
@@ -598,7 +599,10 @@ phina.define('Gauge', {
       height: this.options.height,
       fill: this.options.backgroundColor,
       stroke: null,
-    }).addChildTo(this);
+      originX: 0,  // 左寄せ
+    })
+    .addChildTo(this)
+    .setPosition(-this.options.width / 2, 0);
 
     // ゲージのメイン部分（現在の値を表示）
     this.bar = RectangleShape({
@@ -620,15 +624,43 @@ phina.define('Gauge', {
   },
 
   // フレームごとに値を自動更新
-  update: function() {
+  update: function(app) {
+    // HPが滑らかに減少するように、現在のHPを目的のHPに徐々に近づける
+    const targetValue = this.options.valueObject.value;
+    const delta = targetValue - this.currentValue;
+    const smoothSpeed = app.deltaTime / this.options.smoothDuration;
+
+    if (Math.abs(delta) > 0.1) {
+      this.currentValue += delta * smoothSpeed;
+    } else {
+      this.currentValue = targetValue;  // わずかな差になったら直接セット
+    }
+
+    // ゲージの幅を更新
     this.bar.width = this._getBarWidth();
+
+    // HPの割合に応じて色を変える
+    this._updateBarColor();
     this.label.text = `${this.options.labelText}${this.options.valueObject.value}`
   },
 
   // ゲージの幅を現在のオブジェクトの値に基づいて計算
   _getBarWidth: function() {
-    const value = this.options.valueObject.value;  // オブジェクトから値を取得
+    const value = this.currentValue; // オブジェクトから値を取得
     return (this.options.width * this._clamp(value, 0, this.options.maxValue)) / this.options.maxValue;
+  },
+
+  // ゲージの色をHPに応じて変更
+  _updateBarColor: function() {
+    const ratio = this.currentValue / this.options.maxValue;
+
+    if (ratio > 0.6) {
+      this.bar.fill = 'green';  // HPが60%以上なら緑
+    } else if (ratio > 0.3) {
+      this.bar.fill = 'yellow';  // HPが30%以上なら黄色
+    } else {
+      this.bar.fill = 'darkred';  // HPが30%未満なら赤
+    }
   },
 
   // 値をmin, maxの範囲内に収めるメソッド

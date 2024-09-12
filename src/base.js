@@ -212,8 +212,8 @@ phina.define('BaseScene', {
   },
 
   checkWallCollision: function(ball) {
-    const minAngle = 0.3;  // 最小角度（0に近すぎると水平または垂直に行ったり来たりする）
-    const maxAngle = 1.2;  // 最大角度（ボールが極端に直線的に動くのを防ぐ）
+    const minAngle = 0.2;  // 最小角度（0に近すぎると水平または垂直に行ったり来たりする）
+    const maxAngle = 1.1;  // 最大角度（ボールが極端に直線的に動くのを防ぐ）
   
     // 左の壁に当たった場合
     if (ball.left < 0) {
