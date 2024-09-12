@@ -1,4 +1,4 @@
-import { config } from '../config.js';
+import { config } from '../config.js?version=1.0.0';
 
 phina.define('BossScene', {
   superClass: 'BaseScene',
@@ -84,7 +84,7 @@ phina.define('BossScene', {
   setupPlayer: function() {
     this.player = {
       HP: {
-        value: 70,
+        value: 50,
       },
     };
 
@@ -196,10 +196,10 @@ phina.define('BossScene', {
         if (!dragon) return
         if (this.checkDragonCollision(ball, dragon)) {
           const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
-          dragon.remove();
-          this.dragons[idx] = null;
           this.dragonSound.play()
           await this.pause(stopDuration)
+          dragon.remove();
+          this.dragons[idx] = null;
           await this.shake(shakeDuration, shakeStrength);
         }
       })
@@ -432,7 +432,7 @@ phina.define('Dragon', {
       this.direction = 'right';  // 左端に到達したら右に移動
       this.fly2();  // 右向きのアニメーションに変更
     }
-    if (this.y >= config.screen.height - this.height / 2 - 500) {
+    if (this.y >= config.screen.height - this.height / 2 - 300) {
       this.direction = 'up';  // 下端に到達したら上に移動
       this.fly1();  // 上向きのアニメーションに変更
     }
