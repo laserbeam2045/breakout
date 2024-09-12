@@ -38,14 +38,6 @@ phina.define("MainScene", {
 
     this.createBlocks(gridX, gridY);
 
-    // 残りブロック数の表示用ラベル
-    this.remainingBlocksLabel = Label({
-      text: 'Blocks: ',
-      fontSize: 30,
-      fill: 'white',
-      align: 'right',  // 右寄せ
-    }).addChildTo(this).setPosition(config.screen.width - 30, 30);  // 画面右上に配置
-
     // パドル、ボール、ブロックなどの設定
     this.paddle = Paddle().addChildTo(this);
     this.paddle.setPosition(this.gridX.center(), this.gridY.span(13)); // バーを少し上に移動
@@ -58,6 +50,14 @@ phina.define("MainScene", {
 
     this.paddle.hold(this.balls[0]);
 
+    // 残りブロック数の表示用ラベル
+    this.remainingBlocksLabel = Label({
+      text: `Blocks: ${this.blocks.children.length}`,
+      fontSize: 30,
+      fill: 'white',
+      align: 'right',  // 右寄せ
+    }).addChildTo(this).setPosition(config.screen.width - 30, 30);  // 画面右上に配置
+
     this.isGameStarted = false;
     this.on('pointend', this.startGame.bind(this));
 
@@ -68,6 +68,8 @@ phina.define("MainScene", {
     if (app.isShaking) return;
 
     this.time += app.deltaTime;
+
+    this.remainingBlocksLabel.text = `Blocks: ${this.blocks.children.length}`
 
     if (this.isGameOver || this.clearFlag) {
       this.on('pointend', () => {
@@ -135,7 +137,7 @@ phina.define("MainScene", {
       this.movePaddle(app.pointer);
     }
 
-    if (this.group.children.length <= 0) {
+    if (this.blocks.children.length <= 0) {
       this.gameClear();
     }
   },

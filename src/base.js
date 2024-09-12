@@ -29,6 +29,8 @@ phina.define('BaseScene', {
     this.isClear = false;       // ゲームクリアフラグ
     this.isShaking = false;     // 震動中フラグ
 
+    this.group = DisplayElement().addChildTo(this);
+
     // デバイスがPCかどうかを判定
     this.isPC = !phina.isMobile();
 
@@ -143,12 +145,14 @@ phina.define('BaseScene', {
     const { rows, cols } = config.scene.main.block;
     const blockNum = rows * cols;
 
+    this.blocks = DisplayElement().addChildTo(this);
+
     (blockNum).times(function(i) {
       var xIndex = i % cols;
       var yIndex = Math.floor(i / cols);
       var colorAngle = (360 / blockNum) * i;
 
-      Block(colorAngle).addChildTo(this.group).setPosition(
+      Block(colorAngle).addChildTo(this.blocks).setPosition(
         gridX.span(xIndex) + config.scene.main.padding + config.scene.main.block.size / 2,
         gridY.span(yIndex) + 70,
       );
@@ -410,7 +414,7 @@ phina.define('BaseScene', {
   },
 
   checkBlockCollisions: function(ball) {
-    this.group.children.clone().some(function(block) {
+    this.blocks.children.clone().some(function(block) {
       if (ball.hitTestElement(block)) {
         this.handleBlockCollision(block, ball);
         return true;
@@ -440,12 +444,6 @@ phina.define('BaseScene', {
     // }
   
     block.remove();
-
-    // 残りブロック数を減らす
-    this.remainingBlocks--;
-
-    // ラベルを更新
-    this.remainingBlocksLabel.text = 'Blocks: ' + this.remainingBlocks;
 
     // スコアを加算 (例えばブロック1つあたり100点)
     this.score += 100;
