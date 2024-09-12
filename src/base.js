@@ -10,7 +10,9 @@ phina.define('StopScene', {
     this.superInit()
     this.setInteractive(false)
     this.backgroundColor = 'rgba(0, 0, 0, 0)';
+    console.log('Pause')
     setTimeout(() => {
+      console.log('UnPause')
       this.setInteractive(true)
       this.exit()
     }, stopDuration)
@@ -335,6 +337,7 @@ phina.define('BaseScene', {
   },
 
   pause: function(stopDuration) {
+    if (this.isStopping) return new Promise((resolve, reject) => resolve())
     this.isStopping = true
 
     // シーンを追加することで動きを止める

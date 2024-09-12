@@ -1,4 +1,4 @@
-import { config } from '../config.js?version=1.0.1';
+import { config } from '../config.js?version=1.0.2';
 
 phina.define('BossScene', {
   superClass: 'BaseScene',
@@ -105,8 +105,8 @@ phina.define('BossScene', {
   // ドラゴン（複数体）の初期化
   setupDragons: function() {
     this.dragons = [
-      Dragon({ HP: 2000, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 3000, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 1000, size: 256, name: 'RedDragon', color: 'red' }),
+      Dragon({ HP: 2000, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
@@ -272,9 +272,15 @@ phina.define('BossScene', {
 
   // ドラゴンとの衝突判定
   checkDragonCollision: function(ball, dragon) {
-    if (ball.hitTestElement(dragon)) {
+    let dir
+    if (dir = dragon.hitTestElement(ball)) {
       // ボールがドラゴンに当たった際の反射処理
-      ball.reflectY();
+      switch (dir) {
+        case 'top': ball.reflectY(); break;
+        case 'left': ball.reflectX(); break;
+        case 'right': ball.reflectX(); break;
+        case 'bottom': ball.reflectY(); break;
+      }
 
       // ボールのクールダウンタイマーを開始
       this.startBallCooldown(ball);
@@ -306,7 +312,7 @@ phina.define('BossScene', {
     ball.isOnCooldown = true;  // クールダウンを有効にする
     setTimeout(() => {
       ball.isOnCooldown = false;  // 10ms後にクールダウンを解除
-    }, 100);
+    }, 750);
   },
 
   gameOver: function() {
@@ -374,7 +380,7 @@ phina.define('Dragon', {
     name = 'RedDragon',
     color = 'red',
     direction = 'up',
-    speed = 3,
+    speed = 4,
   }){
     this.superInit(name);
     this.setOrigin(0.5, 0.5);
@@ -394,7 +400,7 @@ phina.define('Dragon', {
     this.setSize(size, size);
 
     // 当たり判定のサイズ（スプライトサイズより小さく設定）
-    this.hitAreaRadius = 200;  // ここで当たり判定の大きさを設定
+    this.hitAreaRadius = 120;  // ここで当たり判定の大きさを設定
   },
 
   update: function(app) {
@@ -435,7 +441,7 @@ phina.define('Dragon', {
       this.direction = 'right';  // 左端に到達したら右に移動
       this.fly2();  // 右向きのアニメーションに変更
     }
-    if (this.y >= config.screen.height - this.height / 2 - 300) {
+    if (this.y >= config.screen.height - this.height / 2 - 200) {
       this.direction = 'up';  // 下端に到達したら上に移動
       this.fly1();  // 上向きのアニメーションに変更
     }
@@ -522,11 +528,40 @@ phina.define('Dragon', {
 
   // カスタムの当たり判定メソッド
   hitTestElement: function(target) {
-    // スプライトの見た目の大きさではなく、カスタムの判定範囲を使用
+    // 当たり判定を少し下にずらすためのオフセット
+    const hitOffsetY = 0;  // 当たり判定を下にずらす量
+  
+    // ドラゴンの中心からの距離を計算し、当たり判定を下にずらす
     const dx = this.x - target.x;
-    const dy = this.y - target.y;
+    const dy = (this.y + hitOffsetY) - target.y;
+  
+    // ドラゴンの当たり判定範囲内かを確認
     const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < this.hitAreaRadius + target.width / 2;
+    const isHit = distance < (this.hitAreaRadius + target.width / 2);
+  
+    if (!isHit) {
+      return null;  // 当たっていない場合は null を返す
+    }
+  
+    // ドラゴンの当たり判定エリアの上下左右どこに当たったかを判定
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+  
+    if (absDx > absDy) {
+      // 左右に当たっている場合
+      if (dx > 0) {
+        return 'left';  // ターゲットはドラゴンの左側に当たった
+      } else {
+        return 'right';  // ターゲットはドラゴンの右側に当たった
+      }
+    } else {
+      // 上下に当たっている場合
+      if (dy > 0) {
+        return 'top';  // ターゲットはドラゴンの上側に当たった
+      } else {
+        return 'bottom';  // ターゲットはドラゴンの下側に当たった
+      }
+    }
   },
 });
 
