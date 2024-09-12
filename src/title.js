@@ -15,7 +15,7 @@ phina.define("TitleScene", {
 
     // タイトル表示
     Label({
-      text: '何の写真か当てるげーむ',
+      text: 'Breakout',
       fontSize: 50,
       fill: 'white',
     }).addChildTo(this).setPosition(this.gridX.center(), 100);

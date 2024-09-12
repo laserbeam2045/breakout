@@ -143,6 +143,46 @@ phina.define("MainScene", {
       this.gameClear();
     }
   },
+
+  gameClear: function() {
+    this.clearFlag = true;
+    this.removeAllBalls();
+    this.clearSound.play();
+
+    this.score += Math.floor(this.remainingTime * 100);
+
+    Label({
+      text: 'Game Clear!',
+      fontSize: 64,
+      fill: 'skyblue',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() - 20);
+
+    Label({
+      text: 'なんの写真でしょうか？',
+      fontSize: 50,
+      fill: 'white',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 50);
+  },
+
+  gameOver: function() {
+    this.isGameOver = true;
+    this.failedSound.play();
+    this.removeAllBalls();
+
+    this.score += Math.floor(this.remainingTime * 100);
+
+    Label({
+      text: 'Game Over',
+      fontSize: 64,
+      fill: 'darkred',
+    }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center());
+
+    // Label({
+    //   text: 'なんの写真でしょうか？',
+    //   fontSize: 50,
+    //   fill: 'white',
+    // }).addChildTo(this).setPosition(this.gridX.center(), this.gridY.center() + 50);
+  },
 });
 
 phina.main(function() {
