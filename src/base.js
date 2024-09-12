@@ -208,23 +208,50 @@ phina.define('BaseScene', {
   },
 
   checkWallCollision: function(ball) {
+    const minAngle = 0.3;  // 最小角度（0に近すぎると水平または垂直に行ったり来たりする）
+    const maxAngle = 1.2;  // 最大角度（ボールが極端に直線的に動くのを防ぐ）
+  
+    // 左の壁に当たった場合
     if (ball.left < 0) {
       ball.left = 0;
       ball.reflectX();
+      
+      // 角度調整
+      if (Math.abs(ball.direction.y) < minAngle) {
+        ball.direction.y = minAngle * Math.sign(ball.direction.y || 1);  // y方向が小さすぎる場合調整
+        ball.direction.normalize();
+      }
     }
+  
+    // 右の壁に当たった場合
     if (ball.right > this.gridX.width) {
       ball.right = this.gridX.width;
       ball.reflectX();
+      
+      // 角度調整
+      if (Math.abs(ball.direction.y) < minAngle) {
+        ball.direction.y = minAngle * Math.sign(ball.direction.y || 1);
+        ball.direction.normalize();
+      }
     }
+  
+    // 上の壁に当たった場合
     if (ball.top < 0) {
       ball.top = 0;
       ball.reflectY();
+      
+      // 角度調整
+      if (Math.abs(ball.direction.x) < minAngle) {
+        ball.direction.x = minAngle * Math.sign(ball.direction.x || 1);  // x方向が小さすぎる場合調整
+        ball.direction.normalize();
+      }
     }
+  
+    // 下の壁に当たった場合（ゲームオーバー）
     if (ball.bottom > this.gridY.width) {
-      // ボールが画面の下に出た場合、ボールを削除
       this.balls.splice(this.balls.indexOf(ball), 1);
       ball.remove();
-  
+    
       // すべてのボールがなくなったらゲームオーバー
       if (this.balls.length === 0) {
         this.gameOver();
