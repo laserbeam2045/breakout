@@ -198,10 +198,10 @@ phina.define('BossScene', {
           const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
           this.dragonSound.play()
           await this.pause(stopDuration)
+          dragon.remove();
           this.dragons[idx] = null;
           this.killSound.play()
           await this.shake(shakeDuration, shakeStrength);
-          dragon.remove();
         }
       })
     }
