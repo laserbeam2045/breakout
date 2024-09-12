@@ -98,7 +98,7 @@ phina.define('BossScene', {
       backGroundColor: 'darkred',
       labelText: 'Player: ',
     })
-    .setPosition(320, config.screen.height - 100)
+    .setPosition(320, config.screen.height - 50)
     .addChildTo(this)
   },
 
@@ -343,6 +343,9 @@ phina.define('Fireball', {
     this.anim.gotoAndPlay(skillName);
     this.anim.fit = false;
     this.setSize(192, 192);
+
+    // 当たり判定のサイズ（スプライトサイズより小さく設定）
+    this.hitAreaRadius = 50;  // ここで当たり判定の大きさを設定
   },
 
   move: function() {
@@ -350,6 +353,15 @@ phina.define('Fireball', {
     if (this.y > config.screen.height) {
       this.remove();  // 画面外に出たら火の玉を削除
     }
+  },
+
+  // カスタムの当たり判定メソッド
+  hitTestElement: function(target) {
+    // スプライトの見た目の大きさではなく、カスタムの判定範囲を使用
+    const dx = this.x - target.x;
+    const dy = this.y - target.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < this.hitAreaRadius + target.width / 2;
   },
 });
 
