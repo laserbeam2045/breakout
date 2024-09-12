@@ -23,17 +23,19 @@ phina.define('BossScene', {
     // 共通の操作を実行
     this.superMethod('update', app);
 
+    // 震動中はここでストップ
+    if (this.isHitStop) {
+      return;
+    }
+
     // クリアした状態ならここでreturnする
-    if (this.isGameOver) {
+    if (this.isGameEnd) {
       this.on('pointend', () => this.exit('title'));
       if (app.keyboard.getKeyDown('space')) this.exit('title');
       return;
     }
 
-    // 震動中はここでストップ
-    if (app.isShaking) {
-      return;
-    }
+    if (this.isGameOver) return
 
     // ドラゴンが倒れたらゲームクリア
     if (this.isDragonsDead()) {
@@ -50,6 +52,9 @@ phina.define('BossScene', {
 
     if (this.isGameStarted) {
       this.balls.forEach(ball => {
+        if (this.isHitStop) {
+          return;
+        }
         ball.move();
         this.checkPaddleCollision(ball);  // パドルとの衝突処理を呼び出し
         this.checkCollisions(ball);  // 他の衝突処理（ドラゴンや壁など）
@@ -100,8 +105,8 @@ phina.define('BossScene', {
   // ドラゴン（複数体）の初期化
   setupDragons: function() {
     this.dragons = [
-      Dragon({ HP: 50, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 100, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 1000, size: 256, name: 'RedDragon', color: 'red' }),
+      Dragon({ HP: 2000, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
@@ -152,10 +157,12 @@ phina.define('BossScene', {
         const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
         this.player.HP.value -= 10;
         this.paddleReflectSound.play();
+        this.isHitStop = true
         await this.pause(stopDuration)
         fireball.remove();
         this.fireballs.splice(index, 1);
         await this.shake(shakeDuration, shakeStrength);
+        this.isHitStop = false
       }
     });
   },
@@ -182,6 +189,7 @@ phina.define('BossScene', {
   checkCollisions: function(ball) {
     if (!ball.isOnCooldown) {
       this.dragons.forEach(async (dragon, idx) => {
+        if (this.isHitStop) return
         if (!dragon) return
         if (this.checkDragonCollision(ball, dragon)) {
           const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.small
@@ -197,8 +205,9 @@ phina.define('BossScene', {
   },
 
   gameClear: async function() {
-    this.isGameOver = true;
     const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
+
+    this.isGameOver = true;
 
     this.dragonSound.play()
     await this.pause(stopDuration)
@@ -207,6 +216,9 @@ phina.define('BossScene', {
     this.paddle.remove();
     this.removeAllBalls();
     this.removeAllFireballs();
+
+    // TODO: ロジックを変える必要がある
+    this.isGameEnd = true
 
     Label({
       text: 'Game Clear!',
@@ -341,7 +353,7 @@ phina.define('Dragon', {
 
   init: function({
     HP = 1000,
-    size = 256,
+    size = 512,
     name = 'RedDragon',
     color = 'red',
     direction = 'up',
@@ -349,7 +361,6 @@ phina.define('Dragon', {
   }){
     this.superInit(name);
     this.setOrigin(0.5, 0.5);
-    this.setSize(size, size);
     this.HP = { value: HP };
     this.name = name;
     this.color = color;
@@ -362,6 +373,8 @@ phina.define('Dragon', {
     
     // スプライトシートのアニメーション設定
     this.anim = FrameAnimation(animation).attachTo(this);
+    this.anim.fit = false;
+    this.setSize(size, size);
   },
 
   update: function(app) {

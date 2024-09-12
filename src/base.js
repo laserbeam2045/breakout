@@ -283,10 +283,15 @@ phina.define('BaseScene', {
   },
 
   pause: function(stopDuration) {
+    this.isStopping = true
+
     // シーンを追加することで動きを止める
     this.app.pushScene(StopScene(stopDuration))
 
-    return new Promise((resolve) => setTimeout(resolve, stopDuration))
+    return new Promise((resolve) => setTimeout(() => {
+      this.isStopping = false
+      resolve()
+    }, stopDuration))
   },
 
   shake: async function(shakeDuration, shakeStrength) {
@@ -375,9 +380,10 @@ phina.define('BaseScene', {
       });
     }, shakeDuration);
 
-    scene.isShaking = false
-
-    return new Promise((resolve) => setTimeout(resolve, shakeDuration))
+    return new Promise((resolve) => setTimeout(() => {
+      scene.isShaking = false
+      resolve()
+    }, shakeDuration))
   },
   
   // 特定の要素を震動させる関数
