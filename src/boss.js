@@ -272,8 +272,12 @@ phina.define('BossScene', {
 
   // ドラゴンとの衝突判定
   checkDragonCollision: function(ball, dragon) {
+    const dragonName = dragon.name;
+
     let dir
-    if (dir = dragon.hitTestElement(ball)) {
+    if ((dir = dragon.hitTestElement(ball)) && ball.lastHitObject !== dragonName) {
+      ball.lastHitObject = dragonName
+
       // ボールがドラゴンに当たった際の反射処理
       switch (dir) {
         case 'top': ball.reflectY(); break;
@@ -312,7 +316,7 @@ phina.define('BossScene', {
     ball.isOnCooldown = true;  // クールダウンを有効にする
     setTimeout(() => {
       ball.isOnCooldown = false;  // 10ms後にクールダウンを解除
-    }, 750);
+    }, 10);
   },
 
   gameOver: function() {

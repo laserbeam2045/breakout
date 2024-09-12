@@ -56,7 +56,6 @@ phina.define('BaseScene', {
   },
 
   update: function(app) {
-    // console.log(app)
   },
 
   startGame: function() {
@@ -157,10 +156,11 @@ phina.define('BaseScene', {
       var yIndex = Math.floor(i / (cols * this.stage));
       var colorAngle = (360 / blockNum) * i;
 
-      Block(colorAngle, blockSize).addChildTo(this.blocks).setPosition(
+      const block = Block(colorAngle, blockSize).addChildTo(this.blocks).setPosition(
         gridX.span(xIndex) + blockSize / 2 + config.scene.main.padding + 1,
         gridY.span(yIndex) + 70,
       );
+      block.number = i
     }, this);
   },
 
@@ -217,18 +217,20 @@ phina.define('BaseScene', {
   
     // 左の壁に当たった場合
     if (ball.left < 0) {
+      ball.lastHitObject = 'leftWall'
       ball.left = 0;
       ball.reflectX();
       
       // 角度調整
-      if (Math.abs(ball.direction.y) < minAngle) {
+      if (Math.abs(ball.direction.y) < minAngle && ball.lastHitObject !== 'leftWall') {
         ball.direction.y = minAngle * Math.sign(ball.direction.y || 1);  // y方向が小さすぎる場合調整
         ball.direction.normalize();
       }
     }
   
     // 右の壁に当たった場合
-    if (ball.right > this.gridX.width) {
+    if (ball.right > this.gridX.width && ball.lastHitObject !== 'rightWall') {
+      ball.lastHitObject = 'rightWall'
       ball.right = this.gridX.width;
       ball.reflectX();
       
@@ -240,7 +242,8 @@ phina.define('BaseScene', {
     }
   
     // 上の壁に当たった場合
-    if (ball.top < 0) {
+    if (ball.top < 0 && ball.lastHitObject !== 'topWall') {
+      ball.lastHitObject = 'topWall'
       ball.top = 0;
       ball.reflectY();
       
@@ -250,7 +253,7 @@ phina.define('BaseScene', {
         ball.direction.normalize();
       }
     }
-  
+
     // 下の壁に当たった場合（ゲームオーバー）
     if (ball.bottom > this.gridY.width) {
       this.balls.splice(this.balls.indexOf(ball), 1);
@@ -286,6 +289,8 @@ phina.define('BaseScene', {
     if (this.isShaking) return;
 
     if (ball.hitTestElement(this.paddle)) {
+      ball.lastHitObject = 'paddle'
+
       // パドルの上に当たった場合
       if (ball.x >= this.paddle.left && ball.x <= this.paddle.right) {
         if (ball.bottom >= this.paddle.top) {
@@ -326,7 +331,6 @@ phina.define('BaseScene', {
       }
       // // ボールの側面がパドルの側面に当たった場合
       // else if (!ball.isFallen) {
-      //   console.log(ball)
       //   // X方向の反射のみを行う
       //   // ball.reflectX();
       //   ball.isFallen = true;
@@ -477,6 +481,7 @@ phina.define('BaseScene', {
   checkBlockCollisions: function(ball) {
     this.blocks.children.clone().some(function(block) {
       if (ball.hitTestElement(block)) {
+        ball.lastHitObject = block.number
         this.handleBlockCollision(block, ball);
         return true;
       }
@@ -620,6 +625,9 @@ phina.define('Ball', {
     } else {
       this.zIndex = 1;  // 通常のボール
     }
+
+    // 最後に当たった対象を記録するためのプロパティを追加
+    this.lastHitObject = null;
   },
 
   // 内側に影を描画するためのカスタム描画
