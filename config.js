@@ -63,7 +63,7 @@ export const config = {
   hitStop: {
     small: {
       stopDuration: 0,
-      shakeDuration: 200,
+      shakeDuration: 100,
       shakeStrength: 10,
     },
     large: {

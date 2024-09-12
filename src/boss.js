@@ -84,7 +84,7 @@ phina.define('BossScene', {
   setupPlayer: function() {
     this.player = {
       HP: {
-        value: 100,
+        value: 70,
       },
     };
 
