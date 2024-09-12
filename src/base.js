@@ -165,38 +165,39 @@ phina.define('BaseScene', {
   },
 
   movePaddleWithKeyboard: function(keyboard) {
-    const initSpeed = 35  // パドルの初速
-    const maxSpeed = 50;  // パドルの最大速度
+    const initSpeed = 30  // パドルの初速
+    const maxSpeed = 60;  // パドルの最大速度
     const acceleration = 5.0;  // 加速度
     const deceleration = 0.5;  // 減速率
 
-  // キーボード入力に応じて速度を変更
-  if (keyboard.getKey('left')) {
-    if (this.paddleSpeed > -initSpeed) {
-      // 初速を持たせる
-      this.paddleSpeed = -initSpeed;
+    // キーボード入力に応じて速度を変更
+    if (keyboard.getKey('left')) {
+      if (this.paddleSpeed > -initSpeed) {
+        // 初速を持たせる
+        this.paddleSpeed = -initSpeed;
+      } else {
+        this.paddleSpeed -= acceleration;  // 左キーでさらに加速
+      }
+    } else if (keyboard.getKey('right')) {
+      if (this.paddleSpeed < initSpeed) {
+        // 初速を持たせる
+        this.paddleSpeed = initSpeed;
+      } else {
+        this.paddleSpeed += acceleration;  // 右キーでさらに加速
+      }
     } else {
-      this.paddleSpeed -= acceleration;  // 左キーでさらに加速
+      this.paddleSpeed *= deceleration;  // キーが押されていないときは減速
     }
-  } else if (keyboard.getKey('right')) {
-    if (this.paddleSpeed < initSpeed) {
-      // 初速を持たせる
-      this.paddleSpeed = initSpeed;
-    } else {
-      this.paddleSpeed += acceleration;  // 右キーでさらに加速
-    }
-  } else {
-    this.paddleSpeed *= deceleration;  // キーが押されていないときは減速
-  }
 
-  // 速度が最大値を超えないように制限
-  this.paddleSpeed = this.paddleSpeed.clamp(-maxSpeed, maxSpeed);
+    // 速度が最大値を超えないように制限
+    this.paddleSpeed = this.paddleSpeed.clamp(-maxSpeed, maxSpeed);
 
-  // パドルの位置を更新
-  this.paddle.x += this.paddleSpeed;
+    // パドルの位置を更新
+    this.paddle.x += this.paddleSpeed;
 
-  // パドルが画面外に出ないように制限
-  this.paddle.x = this.paddle.x.clamp(this.paddle.width / 2, this.gridX.width - this.paddle.width / 2);
+    // パドルが画面外に出ないように制限
+    const targetX = this.paddle.x.clamp(this.paddle.width / 2, this.gridX.width - this.paddle.width / 2);
+    this.paddle.x += (targetX - this.paddle.x) * 0.2;
   },
 
   checkCollisions: function(ball) {

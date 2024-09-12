@@ -105,8 +105,8 @@ phina.define('BossScene', {
   // ドラゴン（複数体）の初期化
   setupDragons: function() {
     this.dragons = [
-      Dragon({ HP: 1000, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 2000, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 2000, size: 256, name: 'RedDragon', color: 'red' }),
+      Dragon({ HP: 3000, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
