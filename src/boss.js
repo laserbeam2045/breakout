@@ -90,7 +90,7 @@ phina.define('BossScene', {
 
     // プレイヤーHPバーと数値ラベル(画面下端に表示)
     Gauge({
-      width: 600,
+      width: 300,
       height: 20,
       maxValue: this.player.HP.value,
       valueObject: this.player.HP,
@@ -98,7 +98,7 @@ phina.define('BossScene', {
       backGroundColor: 'darkred',
       labelText: 'Player: ',
     })
-    .setPosition(320, config.screen.height - 50)
+    .setPosition(320, 150)
     .addChildTo(this)
   },
 
@@ -120,7 +120,7 @@ phina.define('BossScene', {
         backGroundColor: 'darkred',
         labelText: `${dragon.name}: `,
       })
-      .setPosition(170 + 300 * idx, this.gridY.span(2))
+      .setPosition(170 + 300 * idx, 50)
       .addChildTo(this);
 
       const x = this.gridX.span(Math.floor(Math.random() * 3) + 1);
@@ -316,7 +316,7 @@ phina.define('BossScene', {
     ball.isOnCooldown = true;  // クールダウンを有効にする
     setTimeout(() => {
       ball.isOnCooldown = false;  // 10ms後にクールダウンを解除
-    }, 10);
+    }, 0);
   },
 
   gameOver: function() {
