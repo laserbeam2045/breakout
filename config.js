@@ -11,8 +11,8 @@ export const config = {
       padding: 50,
       timeLimit: 40,
       block: {
-        rows: 20,
-        cols: 20,
+        rows: 10,
+        cols: 10,
         size: 26.75,
       },
     },

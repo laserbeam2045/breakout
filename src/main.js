@@ -7,6 +7,8 @@ phina.define("MainScene", {
   init: function(options) {
     this.superInit(options);
 
+    this.stage = options.stage
+
     // 背景画像の上半分を表示
     this.backgroundSprite = Sprite(`background0${options.stage}`).addChildTo(this)
       .setPosition(this.gridX.center(), this.gridY.center(-3) - 70)
@@ -33,8 +35,8 @@ phina.define("MainScene", {
     this.score = 0;
 
     this.group = DisplayElement().addChildTo(this);
-    var gridX = Grid(config.screen.width - config.scene.main.padding * 2, config.scene.main.block.cols);
-    var gridY = Grid(config.screen.width - config.scene.main.padding * 2, config.scene.main.block.rows);
+    var gridX = Grid(config.screen.width - config.scene.main.padding * 2, config.scene.main.block.cols * this.stage);
+    var gridY = Grid(config.screen.width - config.scene.main.padding * 2, config.scene.main.block.rows * this.stage);
 
     this.createBlocks(gridX, gridY);
 

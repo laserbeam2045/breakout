@@ -143,17 +143,18 @@ phina.define('BaseScene', {
     let bonusCount = 0;
     const bonusMaxCount = 21;
     const { rows, cols } = config.scene.main.block;
-    const blockNum = rows * cols;
+    const blockNum = (rows * this.stage) * (cols * this.stage);
+    const blockSize = config.scene.main.block.size * (3 - this.stage)
 
     this.blocks = DisplayElement().addChildTo(this);
 
     (blockNum).times(function(i) {
-      var xIndex = i % cols;
-      var yIndex = Math.floor(i / cols);
+      var xIndex = i % (rows * this.stage);
+      var yIndex = Math.floor(i / (cols * this.stage));
       var colorAngle = (360 / blockNum) * i;
 
-      Block(colorAngle).addChildTo(this.blocks).setPosition(
-        gridX.span(xIndex) + config.scene.main.padding + config.scene.main.block.size / 2,
+      Block(colorAngle, blockSize).addChildTo(this.blocks).setPosition(
+        gridX.span(xIndex) + blockSize / 2 + config.scene.main.padding + 1,
         gridY.span(yIndex) + 70,
       );
     }, this);
@@ -553,10 +554,10 @@ phina.define('BaseScene', {
 phina.define('Block', {
   superClass: 'RectangleShape',
 
-  init: function(angle) {
+  init: function(angle, size) {
     this.superInit({
-      width: config.scene.main.block.size,
-      height: config.scene.main.block.size,
+      width: size,
+      height: size,
       fill: 'hsl({0}, 80%, 60%)'.format(angle || 0),
       stroke: null,
       cornerRadius: 3,
