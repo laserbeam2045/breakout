@@ -68,7 +68,7 @@ export const config = {
     },
     large: {
       stopDuration: 500,
-      shakeDuration: 2000,
+      shakeDuration: 1500,
       shakeStrength: 25,
     },
   },
