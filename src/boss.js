@@ -105,8 +105,8 @@ phina.define('BossScene', {
   // ドラゴン（複数体）の初期化
   setupDragons: function() {
     this.dragons = [
-      Dragon({ HP: 500, size: 256, name: 'RedDragon', color: 'red' }),
-      Dragon({ HP: 500, size: 256, name: 'BlueDragon', color: 'blue' }),
+      Dragon({ HP: 10, size: 256, name: 'RedDragon', color: 'red' }),
+      Dragon({ HP: 100, size: 256, name: 'BlueDragon', color: 'blue' }),
     ];
 
     this.dragons.forEach((dragon, idx) => {
@@ -196,12 +196,13 @@ phina.define('BossScene', {
         if (!dragon) return
         if (this.checkDragonCollision(ball, dragon)) {
           const { stopDuration, shakeDuration, shakeStrength } = config.hitStop.large
+          dragon.finished = true
+          this.dragons[idx] = null;
           this.dragonSound.play()
           await this.pause(stopDuration)
-          dragon.remove();
-          this.dragons[idx] = null;
           this.killSound.play()
           await this.shake(shakeDuration, shakeStrength);
+          dragon.remove();
         }
       })
     }
@@ -273,6 +274,8 @@ phina.define('BossScene', {
   // ドラゴンとの衝突判定
   checkDragonCollision: function(ball, dragon) {
     const dragonName = dragon.name;
+
+    if (dragon === null) alert()
 
     let dir
     if ((dir = dragon.hitTestElement(ball)) && ball.lastHitObject !== dragonName) {
@@ -408,6 +411,12 @@ phina.define('Dragon', {
   },
 
   update: function(app) {
+    if (this.finished) {
+      this.anim.finished = true
+      this.anim.paused = true
+      return
+    }
+
     // ランダムな方向転換の処理
     this.changeDirectionTime += app.deltaTime;
     if (this.changeDirectionTime > this.randomChangeInterval) {
