@@ -84,7 +84,7 @@ phina.define('BossScene', {
   setupPlayer: function() {
     this.player = {
       HP: {
-        value: 100,
+        value: 70,
       },
     };
 
@@ -654,12 +654,14 @@ phina.define('Gauge', {
   _updateBarColor: function() {
     const ratio = this.currentValue / this.options.maxValue;
 
-    if (ratio > 0.6) {
-      this.bar.fill = 'green';  // HPが60%以上なら緑
-    } else if (ratio > 0.3) {
-      this.bar.fill = 'yellow';  // HPが30%以上なら黄色
+    if (ratio > 0.75) {
+      this.bar.fill = 'royalblue';  // HPが75%以上なら青
+    } else if (ratio > 0.5) {
+      this.bar.fill = 'mediumaquamarine';  // HPが50%以上なら緑
+    } else if (ratio > 0.25) {
+      this.bar.fill = 'gold';  // HPが25%以上なら黄色
     } else {
-      this.bar.fill = 'darkred';  // HPが30%未満なら赤
+      this.bar.fill = 'darkred';  // HPが25%未満なら赤
     }
   },
 
